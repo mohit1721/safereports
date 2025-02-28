@@ -13,29 +13,38 @@ const protect = async (req, res, next) => {
             // ✅ Decode JWT Token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // ✅ Find User in Database (Admin or PoliceStation)
+            // ✅ Find User[Admin] in Database (Admin or PoliceStation)
             let user = await User.findById(decoded.id).select("-password");
-            if (!user) {
+
+            if (user) {
+                req.user = user;
+                req.user.adminId = user._id; // ✅ Assign Admin ID
+                req.user.role = "ADMIN"; // ✅ Ensure Role is Set
+            } else {
                 user = await PoliceStation.findById(decoded.id).select("-password");
+                if (user) {
+                    req.user = user;
+                    req.user.policeStationId = user._id; // ✅ Assign Police Station ID
+                    req.user.role = "POLICESTATION"; // ✅ Ensure Role is Set
+                }
             }
 
-            if (!user) {
-                return res.status(401).json({ error: "Not authorized, user not found!" });
+            if (!req.user) {
+                return res.status(401).json({ success: false, message: "Not authorized, user not found!" });
             }
 
-            // ✅ Attach User to Request
-            req.user = user;
             next();
         } else {
-            return res.status(401).json({ error: "Not authorized, no token!" });
+            return res.status(401).json({ success: false, message: "Not authorized, no token!" });
         }
     } catch (error) {
-        res.status(401).json({ error: "Not authorized, token failed!" });
+        res.status(401).json({ success: false, message: "Not authorized, token failed!", error: error.message });
     }
 };
+
 // ✅ Admin Only Middleware
 const adminOnly = (req, res, next) => {
-    if (req.user.role !== "ADMIN") {
+    if (!req.user || req.user.role !== "ADMIN") {
         return res.status(403).json({ success: false, message: "Access Denied! Admins only." });
     }
     next();
@@ -44,11 +53,11 @@ const adminOnly = (req, res, next) => {
 /*
 GET /api/admin/reports?status=pending&policeStationName=XYZ&type=theft&reportName=robbery&page=1&limit=5
 Authorization: Bearer <admin-token>
-
 */
+
 const policeOnly = (req, res, next) => {
-    if (req.user.role !== "POLICESTATION") {
-        return res.status(403).json({ success: false, message: "Access Denied!Logged Police Station only." });
+    if (!req.user || req.user.role !== "POLICESTATION") {
+        return res.status(403).json({ success: false, message: "Access Denied! Logged Police Station only." });
     }
     next();
 };
@@ -56,6 +65,6 @@ const policeOnly = (req, res, next) => {
 /*
 GET /api/police/reports?status=resolved&type=theft&reportName=burglary&page=1&limit=5
 Authorization: Bearer <police-token>
-
 */
-module.exports = { protect ,policeOnly, adminOnly};
+
+module.exports = { protect, policeOnly, adminOnly };

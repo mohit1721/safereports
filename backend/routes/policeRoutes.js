@@ -1,10 +1,22 @@
 const express = require("express");
-const { getReportsForPolice, updateReportStatus } = require("../controllers/policeController");
+const {getNearestPoliceStations,getPoliceStationById, getReportsForPolice, updateReportStatus } = require("../controllers/policeController");
 const { protect, policeOnly } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+const rateLimit = require("express-rate-limit");
 
-router.get("/reports", protect, policeOnly, getReportsForPolice); // ✅ Only Logged-in Police
+const nearestPoliceStationLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 20, // Max 20 requests per 1 minutes per IP
+  message: { error: "Too many requests, please try again later" },
+});
+// ✅ Validation Middleware
+
+  
+router.get("/reports/police-station", protect, policeOnly, getReportsForPolice); // ✅ Only Logged-in Police
 router.put("/reports/status/:reportId", protect, policeOnly, updateReportStatus); // ✅ Only Police Can Update Status
+// Route to find nearest police stations
+router.get("/nearest",nearestPoliceStationLimiter,getNearestPoliceStations);
+router.get("/police/:id", getPoliceStationById);
 
 module.exports = router;

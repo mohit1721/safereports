@@ -1,27 +1,29 @@
+ 
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const PoliceStationSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ["POLICESTATION"], default: "POLICESTATION" }, // ✅ Default Set
-    latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true },
+    password: { type: String},
+    role: { type: String, enum: ["POLICESTATION"], default: "POLICESTATION" }, 
+    location: {
+        type: { type: String, enum: ["Point"], required: true, default: "Point" }, // ✅ GeoJSON format
+        coordinates: { type: [Number], required: true, index: "2dsphere" }, // ✅ Store as [longitude, latitude]
+    },
     district: { type: String, required: true },
     state: { type: String, required: true },
-    isCentral: { type: Boolean, default: false } // ✅ Identify Central Police Station
+    isCentral: { type: Boolean, default: false },
+    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: "Report" }] // ✅ Reports reference added
+
 });
 
-// ✅ Password Hashing & Central Station Validation (Combined Middleware)
+// ✅ Create Geospatial Index 
+PoliceStationSchema.index({ location: "2dsphere" });
+
+// ✅ Ensure Only One Central Police Station
 PoliceStationSchema.pre("save", async function (next) {
     try {
-        // // ✅ Password Hashing
-        // if (this.isModified("password")) {
-        //     this.password = await bcrypt.hash(this.password, 10);
-        // }
-
-        // ✅ Ensure Only One Central Police Station
         if (this.isCentral) {
             const existingCentralStation = await mongoose.model("PoliceStation").findOne({ isCentral: true });
             if (existingCentralStation && existingCentralStation._id.toString() !== this._id.toString()) {
@@ -34,6 +36,8 @@ PoliceStationSchema.pre("save", async function (next) {
         next(error);
     }
 });
+
+
 
 // ✅ Password Match Method
 PoliceStationSchema.methods.matchPassword = async function (enteredPassword) {

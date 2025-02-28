@@ -67,7 +67,6 @@ const emailTemplatePoliceStation = (name, email, password, loginLink) => {
             <p>Your police station has been successfully registered in the SafeReport system. Below are your login credentials:</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Password:</strong> ${password}</p>
-            <p>Please log in and change your password immediately for security purposes.</p>
           </div>
   
           <a href="${loginLink}" class="button">Login Now</a>
@@ -84,4 +83,4 @@ const emailTemplatePoliceStation = (name, email, password, loginLink) => {
   };
   
   module.exports = emailTemplatePoliceStation;
-  
+  //             <p>Please log in and change your password immediately for security purposes.</p>

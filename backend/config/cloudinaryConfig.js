@@ -1,37 +1,24 @@
-const { v2: cloudinary } = require("cloudinary");
-const dotenv = require("dotenv");
+const cloudinary = require("cloudinary").v2;
 
-dotenv.config();
-
-// ✅ Cloudinary Config
+// ✅ Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ✅ Upload Files to Cloudinary (Handles Both Multer Files & Base64 Strings)
-const uploadFiles = async (files) => {
+// ✅ Upload Single File to Cloudinary
+exports.uploadToCloudinary = async (file, folder, height, quality) => {
   try {
-    const uploadPromises = files.map((file) => {
-      if (file.path) {
-        // ✅ If file is from Multer (Form-Data)
-        return cloudinary.uploader.upload(file.path, { resource_type: "auto" });
-      } else if (file.base64) {
-        // ✅ If file is Base64 String
-        return cloudinary.uploader.upload(file.base64, { resource_type: "auto" });
-      } else {
-        throw new Error("Invalid file format! Must be Multer file or Base64 string.");
-      }
-    });
+    const options = { folder, resource_type: "auto" };
 
-    const uploadedFiles = await Promise.all(uploadPromises);
-    return uploadedFiles.map((file) => file.secure_url);
+    if (height) options.height = height;
+    if (quality) options.quality = quality;
+
+    const uploadedFile = await cloudinary.uploader.upload(file.tempFilePath, options);
+    return uploadedFile.secure_url; // ✅ Returns Uploaded Image URL
   } catch (error) {
     console.error("Cloudinary Upload Error:", error);
     throw new Error("File upload failed!");
   }
 };
-
-// ✅ Export for CommonJS
-module.exports = { uploadFiles };

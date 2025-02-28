@@ -6,6 +6,6 @@ const router = express.Router();
 
 // ✅ Police Station Add Route (Only Admin)
 router.post("/add-police-station", protect,adminOnly,  addPoliceStation);
-router.get("/reports", protect, adminOnly, getAllReports); // ✅ Only Admin
+router.get("/reports/admin", protect, adminOnly, getAllReports); // ✅ Only Admin
 router.get("/police-stations", protect, adminOnly, getAllPoliceStations); // ✅ Only Admin
 module.exports = router;

@@ -7,20 +7,17 @@ const sendPoliceStationCredentials = require("../config/nodemailerConfig");
 const addPoliceStation = async (req, res) => {
     try {
         // ✅ Sirf Admin Role Allow
-        if (req.user.role !== "ADMIN") {
+        if (req.user.role !== "ADMIN" && !req.user.adminId) {
             return res.status(403).json({
                 success: false,
                 error: "Access Denied! Only Admin can add Police Stations."
             });
         }
 
-        const { name, email, latitude, longitude, district, state } = req.body;
-// Generate a random password
-const password = Math.random().toString(36).slice(-8); // Generates an 8-character random password
- //  Hash the password before saving
- const hashedPassword = await bcrypt.hash(password, 10);
+        const { name, email, location, district, state, isCentral } = req.body;
+        
         // ✅ Missing Fields Validation
-        if (!name || !email || !latitude || !longitude || !district || !state) {
+        if (!name || !email || !location || !district || !state) {
             return res.status(400).json({
                 success: false,
                 error: "All fields are required!"
@@ -35,102 +32,88 @@ const password = Math.random().toString(36).slice(-8); // Generates an 8-charact
                 error: "Police Station already exists!"
             });
         }
-       
+
+        // ✅ Ensure Only One Central Police Station
+        if (isCentral) {
+            const existingCentral = await PoliceStation.findOne({ isCentral: true });
+            if (existingCentral) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Only one Central Police Station can exist!"
+                });
+            }
+        }
+
+        // ✅ Validate Location Format
+        if (!location.type || location.type !== "Point" || !Array.isArray(location.coordinates) || location.coordinates.length !== 2) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid location format! Location must be in GeoJSON format with type 'Point' and coordinates [longitude, latitude]."
+            });
+        }
+
+        // ✅ Generate & Hash Password
+        const password = Math.random().toString(36).slice(-8); // 8-character random password
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // ✅ Naya Police Station Create
-        const newStation = new PoliceStation({ name, email, password :hashedPassword ,role: "POLICESTATION", latitude, longitude, district, state });
+        const newStation = new PoliceStation({
+            name,
+            email,
+            password: hashedPassword,
+            role: "POLICESTATION",
+            location,
+            district,
+            state,
+            isCentral: isCentral || false
+        });
+
         await newStation.save();
-// Email bhejna police ko credentials ka
-// await sendPoliceStationCredentials(email, "Police Account Created", `Your login credentials:\nEmail: ${email}\nPassword: ${password}`);
-  // ✅ Send Police Station Credentials Email
-  await sendPoliceStationCredentials(email, name, password);
-        res.status(201).json({
+        console.log("PS Credentials:",email , "&" ,password)
+        // ✅ Send Police Station Credentials Email
+        await sendPoliceStationCredentials(email, name, password);
+
+       return res.status(201).json({
             success: true,
             message: "Police Station added successfully!",
             data: newStation
         });
     } catch (error) {
-        res.status(500).json({
+       return res.status(500).json({
             success: false,
             error: error.message
         });
     }
 };
 
-
  
-
-// const getAllReports = async (req, res) => {
-//     try {
-//         // ✅ Sirf Admin Role Allow
-//         if (req.user.role !== "ADMIN") {
-//             return res.status(403).json({ success: false, message: "Access Denied! Only Admin can view reports." });
-//         }
-
-//         // ✅ Filters from Query Params
-//         const { status, policeStationName, type, reportName, page = 1, limit = 10 } = req.query;
-
-//         let filter = {};
-
-//         // ✅ Efficient Index-based Filtering
-//         if (status) filter.status = status;  // Indexed
-//         if (type) filter.type = type;        // Indexed
-
-//         // ✅ Case-Insensitive Search for Report Title
-//         if (reportName) filter.title = { $regex: reportName, $options: "i" }; 
-
-//         // ✅ Police Station Name-based Filtering
-//         if (policeStationName) {
-//             const policeStation = await PoliceStation.findOne({ name: policeStationName }).select("_id").lean();
-//             if (!policeStation) {
-//                 return res.status(404).json({ success: false, message: "Police Station not found." });
-//             }
-//             filter.assignedStation = policeStation._id; // Indexed Field
-//         }
-
-//         // ✅ Paginated & Optimized Query
-//         const reports = await Report.find(filter)
-//             .populate("assignedStation", "name email district state") // Populate only necessary fields
-//             .sort({ createdAt: -1 }) // ✅ Sort by Newest Reports First
-//             .skip((page - 1) * limit)
-//             .limit(parseInt(limit))
-//             .lean(); // ✅ Converts Mongoose Documents into Plain Objects (Performance Boost)
-
-//         // ✅ Response
-//         res.status(200).json({
-//             success: true,
-//             totalReports: reports.length,
-//             reports,
-//         });
-
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: "Error fetching reports", error: error.message });
-//     }
-// };
-
 const getAllReports = async (req, res) => {
     try {
         // ✅ Sirf Admin Role Allow
-        if (req.user.role !== "ADMIN") {
+        if (req.user.role !== "ADMIN" && !req.user.adminId) {
             return res.status(403).json({ success: false, message: "Access Denied! Only Admin can view reports." });
         }
 
         // ✅ Filters from Query Params
-        const { status, policeStationName, type, reportName, page = 1, limit = 10 } = req.query;
+        const { search, status, type, page = 1, limit = 10 } = req.query;
 
         let filter = {};
 
         // ✅ Efficient Index-based Filtering
         if (status) filter.status = status;
         if (type) filter.type = type;
-        if (reportName) filter.title = { $regex: reportName, $options: "i" };
 
-        if (policeStationName) {
-            const policeStation = await PoliceStation.findOne({ name: policeStationName }).select("_id").lean();
-            if (!policeStation) {
-                return res.status(404).json({ success: false, message: "Police Station not found." });
-            }
-            filter.assignedStation = policeStation._id;
+        if (search) {
+            const policeStations = await PoliceStation.find({
+                name: { $regex: search, $options: "i" }
+            }).select("_id").lean();
+
+            const policeStationIds = policeStations.map(station => station._id);
+
+            filter.$or = [
+                { title: { $regex: search, $options: "i" } }, // Report Title search
+                { assignedStation: { $in: policeStationIds } } // Police Station Name search
+            ];
         }
 
         // ✅ Fetch Reports
@@ -141,45 +124,23 @@ const getAllReports = async (req, res) => {
             .limit(parseInt(limit))
             .lean();
 
-        // ✅ Check if No Reports Found
-        if (reports.length === 0) {
-            // Agar koi filter apply nahi kiya gaya, toh **sabhi reports fetch karne ka ek aur chance do**
-            if (Object.keys(filter).length === 0) {
-                reports = await Report.find()
-                    .populate("assignedStation", "name email district state")
-                    .sort({ createdAt: -1 })
-                    .skip((page - 1) * limit)
-                    .limit(parseInt(limit))
-                    .lean();
-            }
-
-            // ✅ Agar ab bhi empty hai toh sahi response bhejo
-            if (reports.length === 0) {
-                return res.status(200).json({ 
-                    success: true, 
-                    message: "No reports found in the database.", 
-                    totalReports: 0, 
-                    reports: [] 
-                });
-            }
-        }
-
         // ✅ Response
-        res.status(200).json({
+       return res.status(200).json({
             success: true,
             totalReports: reports.length,
             reports,
         });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error fetching reports", error: error.message });
+       return res.status(500).json({ success: false, message: "Error fetching reports", error: error.message });
     }
 };
+
 
 const getAllPoliceStations = async (req, res) => {
     try {
         // ✅ Check if User is ADMIN
-        if (!req.user || req.user.role !== "ADMIN") {
+        if (req.user.role !== "ADMIN" && !req.user.adminId) {
             return res.status(403).json({ success: false, message: "Access Denied! Only Admin can view police stations." });
         }
 
@@ -200,10 +161,10 @@ const getAllPoliceStations = async (req, res) => {
             return res.status(200).json({ success: true, message: "No police stations found.", totalStations: 0, policeStations: [] });
         }
 
-        res.status(200).json({ success: true, totalStations: policeStations.length, policeStations });
+       return res.status(200).json({ success: true, totalStations: policeStations.length, policeStations });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error fetching police stations", error: error.message });
+       return res.status(500).json({ success: false, message: "Error fetching police stations", error: error.message });
     }
 };
 

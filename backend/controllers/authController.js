@@ -2,7 +2,7 @@ const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const PoliceStation = require("../models/policeStationModel");
-
+// wait for this to happen
 // Only an ADMIN can register another user
 const registerUser = async (req, res) => {
   try {
@@ -45,8 +45,8 @@ const loginUser = async (req, res) => {
     // ❌ If user not found
     if (!user) return res.status(404).json({ error: "User not found" });
 // Debugging hashed password
-console.log("Entered Password:", password);
-console.log("Stored Hashed Password:", user.password);
+// console.log("Entered Password:", password);
+// console.log("Stored Hashed Password:", user.password);
     // ✅ Check password
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
