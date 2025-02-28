@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+
+
 export default function MobileMenu({ isOpen, onClose }) {
     if (!isOpen) return null;
   
@@ -18,21 +21,21 @@ export default function MobileMenu({ isOpen, onClose }) {
             </div>
   
             <nav className="flex flex-col space-y-4">
-              <a href="/submit-report" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+              <Link to="/submit-report" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 Submit Report
-              </a>
-              <a href="/track-report" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+              </Link>
+              <Link to="/track-report" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 Track Report
-              </a>
-              <a href="/how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+              </Link>
+              <Link to="/how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 How It Works
-              </a>
-              <a href="/resources" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+              </Link>
+              <Link to="/resources" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 Resources
-              </a>
-              <a href="/contact" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+              </Link>
+              <Link to="/contact" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 Contact
-              </a>
+              </Link>
             </nav>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MobileMenu from "./MobileMenu";
-import {Link} from "react-router"
+import {Link} from "react-router-dom"
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -49,12 +49,12 @@ export default function Navbar() {
 
             {/* Emergency & Mobile Menu Button */}
             <div className="flex items-center space-x-4 ">
-              <a href="/contact" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link href="/contact" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
                 Contact
-              </a>
+              </Link>
               <button className="group hidden md:block flex h-9 items-center gap-2 rounded-full bg-red-500/10 pl-4 pr-5 text-sm font-medium text-red-500 ring-1 ring-inset ring-red-500/20 transition-all hover:bg-red-500/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                <a href="tel:112">Emergency: 112</a>
+                <Link href="tel:112">Emergency: 112</Link>
               </button>
 
               {/* Mobile Menu Button */}
