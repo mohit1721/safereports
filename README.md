@@ -21,7 +21,7 @@ This is a state-of-the-art **anonymous reporting system** built with **Next.js 1
 ---
 
 ## ⚙️ Tech Stack  
-- **Next.js 14**  
+
 - **Reactjs**  
 - **Mongoose with MongoDB Database**  
 - **Nodejs**
