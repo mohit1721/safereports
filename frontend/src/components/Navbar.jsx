@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MobileMenu from "./MobileMenu";
-
+import {Link} from "react-router"
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -11,7 +11,7 @@ export default function Navbar() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo & Brand */}
             <div className="flex items-center space-x-3">
-              <a href="/" className="flex items-center space-x-3">
+              <Link to="/" className="flex items-center space-x-3">
                 <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
                   <svg
                     className="h-5 w-5 text-white"
@@ -28,23 +28,23 @@ export default function Navbar() {
                   </svg>
                 </div>
                 <span className="text-lg font-semibold text-wrap">SafeReport</span>
-              </a>
+              </Link>
             </div>
 
             {/* Main Navigation */}
             <div className="hidden md:flex items-center space-x-6">
-              <a href="/submit-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link to="/submit-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Submit Report
-              </a>
-              <a href="/track-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="/track-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Track Report
-              </a>
-              <a href="/how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="/how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 How It Works
-              </a>
-              <a href="/resources" className="text-sm text-zinc-400 hover:text-white transition-colors">
+              </Link>
+              <Link to="/resources" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Resources
-              </a>
+              </Link>
             </div>
 
             {/* Emergency & Mobile Menu Button */}
