@@ -9,7 +9,7 @@ import axios from "axios"
 
 // const BASE_URL = import.meta.env.VITE_APP_BASE_URL
 // const BASE_URL = "http://localhost:5000/api"
-const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
 //  || "http://localhost:5000/api" .....
 const REPORTCATEGORY = [
   "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",

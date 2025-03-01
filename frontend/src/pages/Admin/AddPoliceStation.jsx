@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const AddPoliceStation = () => {
   // https://safereports.onrender.com
-  const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
+  const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
   //  || "http://localhost:5000/api" .....
   const [formData, setFormData] = useState({
     name: "",

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // const API_BASE_URL = "http://localhost:5000/api"; // Replace with your backend URL
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
   //  || "http://localhost:5000/api" .....
 export const loginUser = async (email, password) => {
   try {

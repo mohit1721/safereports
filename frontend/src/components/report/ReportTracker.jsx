@@ -8,7 +8,7 @@ export default function ReportTracker() {
   const [loading, setLoading] = useState(false);
   const [reportDetails, setReportDetails] = useState(null);
 // const BASE_URL = "http://localhost:5000/api"
-const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
   //  || "http://localhost:5000/api" .....
 const handleSubmit = async (e) => {
   e.preventDefault();
