@@ -1,23 +1,43 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../redux/slices/authSlice"; // Import the login thunk
-
+import { loginUser } from "../services/operations/auth"; // Import the login thunk
+import {toast} from "react-hot-toast"
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+const [isLoading, setIsLoading] = useState(false)
+  // const { isLoading, error } = useSelector((state) => state.auth); // Get login status from Redux
 
-  const { isLoading, error } = useSelector((state) => state.auth); // Get login status from Redux
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }))
-      .unwrap()
-      .then(() => navigate("/dashboard")) // Redirect on success
-      .catch((err) => console.log(err)); // Handle errors
+    setError(""); // Reset error message
+
+    const response = await loginUser(email, password);
+    console.log("logged in response",response);
+    if (response.success) {
+      // Redirect based on role
+      const {role}  = response.user;
+      console.log("logged in response role",response.user.role);
+
+      if (role === "POLICESTATION")
+      {
+        toast.success(`${role} Logged in successfully`)
+        navigate("/police-dashboard");
+      }
+   
+      else if (role === "ADMIN") 
+      {
+        toast.success(`${role} Logged in successfully`)
+        navigate("/admin-dashboard");
+      }
+      else navigate("/"); // Default page
+    } else {
+      setError(response.message);
+    }
   };
 
   return (
@@ -33,7 +53,7 @@ const Login = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-neutral-900/50 backdrop-blur-sm py-8 px-4 shadow-xl border border-neutral-800 rounded-xl sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label className="block text-sm font-medium text-neutral-300">Email address</label>
               <input

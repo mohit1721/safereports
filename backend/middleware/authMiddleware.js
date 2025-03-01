@@ -6,41 +6,49 @@ const protect = async (req, res, next) => {
     try {
         let token;
 
-        // ✅ Check if Authorization Header Exists and Starts with 'Bearer'
+        // ✅ Ensure Authorization Header is Present
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
-
-            // ✅ Decode JWT Token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-            // ✅ Find User[Admin] in Database (Admin or PoliceStation)
-            let user = await User.findById(decoded.id).select("-password");
-
-            if (user) {
-                req.user = user;
-                req.user.adminId = user._id; // ✅ Assign Admin ID
-                req.user.role = "ADMIN"; // ✅ Ensure Role is Set
-            } else {
-                user = await PoliceStation.findById(decoded.id).select("-password");
-                if (user) {
-                    req.user = user;
-                    req.user.policeStationId = user._id; // ✅ Assign Police Station ID
-                    req.user.role = "POLICESTATION"; // ✅ Ensure Role is Set
-                }
-            }
-
-            if (!req.user) {
-                return res.status(401).json({ success: false, message: "Not authorized, user not found!" });
-            }
-
-            next();
-        } else {
-            return res.status(401).json({ success: false, message: "Not authorized, no token!" });
         }
+
+        // 🔥 If No Token Found, Return Unauthorized
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Unauthorized! No token provided." });
+        }
+
+        // ✅ Decode JWT Token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // ✅ Check if User Exists in Admins
+        let user = await User.findById(decoded.id).select("-password");
+        if (user) {
+            req.user = user;
+            req.user.role = "ADMIN"; // ✅ Assign Role
+            return next();
+        }
+
+        // ✅ Check if User Exists in Police Stations
+        user = await PoliceStation.findById(decoded.id).select("-password");
+        if (user) {
+            req.user = user;
+            req.user.role = "POLICESTATION"; // ✅ Assign Role
+            req.user.policeStationId = user._id; // ✅ Store ID
+            return next();
+        }
+
+        // ❌ If No User Found, Return Unauthorized
+        return res.status(401).json({ success: false, message: "Unauthorized! User not found." });
+
     } catch (error) {
-        res.status(401).json({ success: false, message: "Not authorized, token failed!", error: error.message });
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized! Invalid or expired token.",
+            error: error.message
+        });
     }
 };
+ 
+
 
 // ✅ Admin Only Middleware
 const adminOnly = (req, res, next) => {

@@ -14,21 +14,13 @@ import PoliceDashboard from "./pages/Police/PoliceDashboard";
 import PolicePrivateRoute from "./components/Auth/PolicePrivateRoute";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminPrivateRoute from "./components/Auth/AdminPrivateRoute";
+import { useEffect } from "react";
 
 
 
 function App(){
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  // const { user } = useSelector((state) => state.user);
-  // useEffect (() => {
-  //   if (localStorage.getItem("token")) {
-  //     const token = JSON.parse(localStorage.getItem("token"))
-  //     dispatch(getUserDetails (token, navigate))
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [])
-
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log("logged user in local storage", user)
 
 return(
 <div className="w-full -p-5 min-h-screen bg-richblack-900 flex flex-col font-inter">
@@ -43,23 +35,23 @@ return(
   <Route path="/submit-report" element={<SubmitReport/>} />
   <Route path="/track-report" element={<TrackReport/>} />
 
-  <Route path="login" element={ <Login /> }/>
+  <Route path="/login" element={ <Login /> }/>
 
 
   <Route
           path="/police-dashboard"
           element={
-            <PolicePrivateRoute>
+            // <PolicePrivateRoute>
               <PoliceDashboard />
-            </PolicePrivateRoute>
+            // </PolicePrivateRoute>
           }
         />
   <Route
           path="/admin-dashboard"
           element={
-            <AdminPrivateRoute>
+            // <AdminPrivateRoute>
               <AdminDashboard />
-            </AdminPrivateRoute>
+            // </AdminPrivateRoute>
           }
         />
 

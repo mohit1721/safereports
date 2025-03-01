@@ -35,9 +35,11 @@ const registerUser = async (req, res) => {
 
 // Login function for both Users and Police Stations
 const loginUser = async (req, res) => {
+  console.log("fr se login req->");
+
   try {
     const { email, password } = req.body;
-
+console.log("fr se login req->",email,password);
     // ✅ Check in both User and PoliceStation collections
     let user = await User.findOne({ email });
     if (!user) user = await PoliceStation.findOne({ email });
