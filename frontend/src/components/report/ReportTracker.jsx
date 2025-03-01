@@ -35,6 +35,15 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
+const getStatusColor = (status) => {
+  const colors = {
+    PENDING: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
+    IN_PROGRESS: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+    RESOLVED: "bg-green-500/10 text-green-500 border border-green-500/20",
+    DISMISSED: "bg-neutral-500/10 text-neutral-400 border border-neutral-500/20",
+  };
+  return colors[status] || "bg-gray-500";
+};
   return (
     <div className="w-full capitalize mt-20">
       {/* Header Section */}
