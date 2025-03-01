@@ -5,7 +5,6 @@ const PoliceStation = require("../models/policeStationModel");
 const protect = async (req, res, next) => {
     try {
         let token;
-console.log("police yehaan se ja rha..uska token ye->", token)
         // ✅ Ensure Authorization Header is Present
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
@@ -15,6 +14,7 @@ console.log("police yehaan se ja rha..uska token ye->", token)
         if (!token) {
             return res.status(401).json({ success: false, message: "Unauthorized! No token provided." });
         }
+        // console.log("police yehaan se ja rha..uska token ye->", token)
 
         // ✅ Decode JWT Token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

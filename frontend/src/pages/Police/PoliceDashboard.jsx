@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect,useRef , useState } from "react";
 import { useNavigate } from "react-router-dom";
 import  {toast} from "react-hot-toast"
 import axios from "axios"
 const BASE_URL = "http://localhost:5000/api";
+import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 
 // import 'video-react/dist/video-react.css'; //~ in new
 // import {
@@ -20,17 +21,30 @@ const BASE_URL = "http://localhost:5000/api";
 const PoliceDashboard = () => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
-  const [filters, setFilters] = useState({ search: "", status: "", type: "" });
+  const [filters, setFilters] = useState({ reportName: "", status: "", type: "",category:"" });
   const [isLoading, setIsLoading] = useState(true);
   const [policeStation, setPoliceStation] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalReports, setTotalReports] = useState(0);
 
+  const REPORTCATEGORY = [
+    "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
+    "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",
+    "Fraud", "Domestic Crime", "Burglary", "Corrupt Behavior", "Human Trafficking",
+    "Kidnapping", "Knife Crime", "Theft", "Fire Outbreak", "Medical Emergency",
+    "Natural Disaster", "Violence", "Other"
+  ];
+  const fetchReportsRef = useRef(null); // 🔥 Store the debounced function reference
+
+  const token = localStorage.getItem("token"); 
   useEffect(() => {
     // 📌 Get the logged-in police station details from localStorage
     const storedUser = localStorage.getItem("user");
     console.log("user in police", storedUser);
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      console.log("username in police", user.name);
+      console.log("username in police", user?.name);
 
       setPoliceStation(user || "Unknown Station");
     }
@@ -45,43 +59,53 @@ const PoliceDashboard = () => {
 
   // 📌 Fetch Reports (Police-Specific)
   useEffect(() => {
-    const fetchReports = async () => {
-      setIsLoading(true);
-      try {
-        const validFilters = Object.fromEntries(
-          Object.entries(filters).filter(([_, v]) => v !== "")
-        );
-        const queryParams = new URLSearchParams(validFilters).toString();
-        const token = localStorage.getItem("token"); // 🔥 Get token from localStorage
-        console.log("going Response for logged in station")
+    console.log("Filters Applied:", filters); // ✅ Debugging filters
+    if (!fetchReportsRef.current) {
+      fetchReportsRef.current = debounce(async (filters) => {
+        setIsLoading(true);
+        try {
+          const validFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v !== "")
+          );
+          const queryParams = new URLSearchParams({ ...validFilters, page, limit }).toString();
+          console.log("Query Params:", queryParams); // Debugging
+          // const queryParams = new URLSearchParams(validFilters).toString();
+          const token = localStorage.getItem("token");
+  
+          console.log("Fetching reports with query:", queryParams); // ✅ Check Query Params
+          const { data } = await axios.get(
+            `${BASE_URL}/police/reports/police-station?${queryParams}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+  
+          console.log("Fetched Reports:", data.reports); // ✅ Debugging API response
+          setReports(data.reports || []);
+          setTotalReports(data.totalReports);
 
-        // const response = await fetch(`${BASE_URL}/report/reports/police-station?${queryParams}`);
-        const data = await axios.get(`${BASE_URL}/police/reports/police-station?${queryParams}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`, // 🔥 Include token
-            "Content-Type": "application/json",
-          }
-        });
-        console.log("Response for logged in station",data)
-          // ✅ Check if response is actually JSON
-    const contentType = data.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format. Received HTML instead of JSON.");
+        } catch (error) {
+          toast.error(error.message);
+          console.error("Error fetching reports:", error);
+        }
+        setIsLoading(false);
+      }, 500);
     }
-        // const data = await response.json();
-        console.log("Response for logged in station",data)
-        toast.success(data.data.message);
-        setReports(data.data.reports || []);
-      } catch (error) {
-        toast.error(error.message)
-        console.log("Error fetching reports:", error);
-      }
-      setIsLoading(false);
-    };
+  
+    fetchReportsRef.current(filters);
+  }, [filters,page]);
 
-    fetchReports();
-  }, [filters]);
-
+   // Handle filter changes
+   const handleFilterChange = (e) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [e.target.name]: e.target.value,
+    }));
+    setPage(1); // Reset to page 1 when filters change
+  };
   // 📌 Status Color Function
   const getStatusColor = (status) => {
     const colors = {
@@ -99,7 +123,7 @@ const PoliceDashboard = () => {
       const token = localStorage.getItem("token"); // 🔥 Get token from localStorage
   
       if (!token) {
-        console.error("No token found! User not authenticated.");
+        toast.error("No token found! User not authenticated.");
         return;
       }
   
@@ -147,7 +171,7 @@ const PoliceDashboard = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navbar */}
-      <nav className="border-b mt-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
+      <nav className="border-b mt-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex flex-col md:flex-row items-center gap-4">
       <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
@@ -172,15 +196,18 @@ const PoliceDashboard = () => {
           <div className="flex gap-4 w-full flex flex-col md:flex-row">
           <input
           type="text"
+          name="reportName"
           placeholder="Search by Title"
-          value={filters.search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          value={filters.reportName}
+          onChange={handleFilterChange}
           className="border w-full text-sm w-full p-2 rounded w-1/3"
         />
             <select
+            name="status"
               value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+              onChange={(e) =>
+    setFilters((prev) => ({ ...prev, status: e.target.value }))
+  }              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
             >
               <option value="">All Statuses</option>
               <option value="PENDING">Pending</option>
@@ -190,15 +217,26 @@ const PoliceDashboard = () => {
             </select>
 
             <select
-              value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
-            >
-              <option value="">All Types</option>
-              <option value="THEFT">Theft</option>
-              <option value="ASSAULT">Assault</option>
-              <option value="VANDALISM">Vandalism</option>
-            </select>
+            name="type"
+  value={filters.type || ""}
+  onChange={handleFilterChange} className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+>
+ <option value="">All Types</option>
+  <option value="EMERGENCY">Emergency</option>
+  <option value="NON_EMERGENCY">Non Emergency</option>
+</select>
+            <select
+            name="category"
+  value={filters.category || ""}
+  onChange={handleFilterChange} className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+>
+  <option value="">All Categories</option> {/* ✅ Default option */}
+  {REPORTCATEGORY?.map((item, index) => (
+    <option key={index} value={item}>
+      {item}
+    </option>
+  ))}
+</select>
           </div>
 
           <div className="text-neutral-400">{reports.length} Reports</div>
@@ -224,6 +262,12 @@ const PoliceDashboard = () => {
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
                     <span>📍 {report.address || "N/A"}</span>
                     <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
+                    <span> Category: {report.category || "N/A"}</span>
+                    <span
+                    className=""
+                    > Type: <span  className={`${
+    report.type ==="EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+  } p-2 rounded-lg font-semibold`}>{report.type || "N/A"} </span> </span>
                   </div>
 
                   {report.image && (
@@ -276,6 +320,7 @@ const PoliceDashboard = () => {
             </div>
           ))}
         </div>
+    
         {reports.length === 0 && (
   <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-900/50 rounded-xl border border-neutral-800 text-neutral-400 py-12">
     {console.log("No Reports Found! filteredReports.length =", reports.length)}
@@ -302,7 +347,32 @@ const PoliceDashboard = () => {
     </p>
   </div>
 )}
-  
+       {/* Pagination */}
+       {/* Pagination */}
+<div className="flex justify-between font-bold mt-4">
+  <button
+    className={`border border-white px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${
+      page === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+    }`}
+    onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+    disabled={page === 1}
+  >
+    Previous
+  </button>
+
+  <span>Page {page}</span>
+
+  <button
+    className={`border border-white px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${
+      page * limit >= totalReports ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+    }`}
+    onClick={() => setPage((prev) => (prev * limit < totalReports ? prev + 1 : prev))}
+    disabled={page * limit >= totalReports}
+  >
+    Next
+  </button>
+</div>
+
       </main>
     </div>
   );

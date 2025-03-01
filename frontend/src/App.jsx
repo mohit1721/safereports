@@ -15,6 +15,7 @@ import PolicePrivateRoute from "./components/Auth/PolicePrivateRoute";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminPrivateRoute from "./components/Auth/AdminPrivateRoute";
 import { useEffect } from "react";
+import AddPoliceStation from "./pages/Admin/AddPoliceStation";
 
 
 
@@ -41,21 +42,29 @@ return(
   <Route
           path="/police-dashboard"
           element={
-            // <PolicePrivateRoute>
+            <PolicePrivateRoute>
               <PoliceDashboard />
-            // </PolicePrivateRoute>
+           </PolicePrivateRoute>
           }
         />
-  <Route
+ 
+ <Route
           path="/admin-dashboard"
           element={
-            // <AdminPrivateRoute>
+            <AdminPrivateRoute>
               <AdminDashboard />
-            // </AdminPrivateRoute>
+             
+          </AdminPrivateRoute>
           }
         />
-
-
+ <Route
+          path="/add-police-station"
+          element={
+            <AdminPrivateRoute>  
+              <AddPoliceStation/>
+          </AdminPrivateRoute>
+          }
+        />
   <Route path="*" element={<Error />} />
 
 

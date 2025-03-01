@@ -70,9 +70,6 @@ const extractAnalysis = (text) => {
 
 
 
-
-
-
 // single station
 // const findNearestStation = async (latitude, longitude) => {
 //   const nearestStation = await PoliceStation.findOne({
@@ -196,8 +193,8 @@ await PoliceStation.findByIdAndUpdate(assignedStation, {
     }
 };
 
+// all reports...[filter by station**]
 
- 
 
 
 // ✅ Get Report by ID (Publicly Accessible)

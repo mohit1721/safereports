@@ -144,11 +144,12 @@ const getReportsForPolice = async (req, res) => {
           return res.status(400).json({ success: false, message: "Your account is not linked to any police station." });
       }
 
-      const { status, type, reportName, page = 1, limit = 10 } = req.query;
+      const { status, type,category, reportName, page = 1, limit = 10 } = req.query;
       const filter = { assignedStation: req.user.policeStationId };
 
       if (status) filter.status = status;
       if (type) filter.type = type;
+      if (category) filter.category = category;
       if (reportName) filter.title = { $regex: reportName, $options: "i" };
 
       const totalReports = await Report.countDocuments(filter);

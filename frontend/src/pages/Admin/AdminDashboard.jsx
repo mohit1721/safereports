@@ -1,20 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {toast} from "react-hot-toast"
 const BASE_URL = "http://localhost:5000/api";
+import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
+import axios from "axios"
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalReports, setTotalReports] = useState(0);
   const [filters, setFilters] = useState({
     search: "",
     status: "",
     type: "",
+    category: "",
+    assignedStation:"",
     page: 1,
     limit: 10,
   });
   const [isLoading, setIsLoading] = useState(true);
-
+  const REPORTCATEGORY = ["",
+    "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
+    "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",
+    "Fraud", "Domestic Crime", "Burglary", "Corrupt Behavior", "Human Trafficking",
+    "Kidnapping", "Knife Crime", "Theft", "Fire Outbreak", "Medical Emergency",
+    "Natural Disaster", "Violence", "Other"
+  ];
+    const fetchReportsRef = useRef(null); // 🔥 Store the debounced function reference
+  
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -23,26 +38,51 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    const fetchReports = async () => {
-      setIsLoading(true);
-      try {
-        const validFilters = Object.fromEntries(
-          Object.entries(filters).filter(([_, v]) => v !== "")
-        );
-        const queryParams = new URLSearchParams(validFilters).toString();
+    console.log("Filters Applied:", filters); // ✅ Debugging filters
+    if (!fetchReportsRef.current) {
+      fetchReportsRef.current = debounce(async (filters) => {
+        setIsLoading(true);
+        try {
+          const validFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v !== "")
+          );
+          const queryParams = new URLSearchParams({ ...validFilters, page, limit }).toString();
+          console.log("Query Params:", queryParams); // Debugging
+          // const queryParams = new URLSearchParams(validFilters).toString();
+          const token = localStorage.getItem("token");
+  
+          console.log("Fetching reports with query:", queryParams); // ✅ Check Query Params
+          const { data } = await axios.get(
+            `${BASE_URL}/admin/reports/?${queryParams}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+  
+          console.log("Fetched Reports:", data.reports); // ✅ Debugging API response
+          setReports(data.reports || []);
+          setTotalReports(data.totalReports);
 
-        const response = await fetch(`${BASE_URL}/admin/reports/admin?${queryParams}`);
-        const data = await response.json();
-        setReports(data.reports || []);
-      } catch (error) {
-        console.error("Error fetching reports:", error);
-      }
-      setIsLoading(false);
-    };
-
-    fetchReports();
-  }, [filters]);
-
+        } catch (error) {
+          toast.error(error.message);
+          console.error("Error fetching reports:", error);
+        }
+        setIsLoading(false);
+      }, 500);
+    }
+  
+    fetchReportsRef.current(filters);
+  }, [filters,page]);
+  const handleFilterChange = (e) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [e.target.name]: e.target.value,
+    }));
+    setPage(1); // Reset to page 1 when filters change
+  };
   const getStatusColor = (status) => {
     const colors = {
       PENDING: "bg-amber-500/10 text-amber-500 border border-amber-500/20",
@@ -53,27 +93,27 @@ const AdminDashboard = () => {
     return colors[status] || "bg-gray-500";
   };
 
-  const updateReportStatus = async (reportId, newStatus) => {
-    try {
-      const response = await fetch(`${BASE_URL}/report/update/${reportId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
+  // const updateReportStatus = async (reportId, newStatus) => {
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/report/update/${reportId}`, {
+  //       method: "PATCH",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ status: newStatus }),
+  //     });
 
-      if (response.ok) {
-        setReports((prevReports) =>
-          prevReports.map((report) =>
-            report.id === reportId ? { ...report, status: newStatus } : report
-          )
-        );
-      } else {
-        console.error("Failed to update status");
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
+  //     if (response.ok) {
+  //       setReports((prevReports) =>
+  //         prevReports.map((report) =>
+  //           report.id === reportId ? { ...report, status: newStatus } : report
+  //         )
+  //       );
+  //     } else {
+  //       console.error("Failed to update status");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating status:", error);
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -86,7 +126,7 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navbar */}
-      <nav className="border-b top-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
+      <nav className="border-b top-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
     
     {/* 📌 Admin Dashboard Title */}
@@ -98,7 +138,7 @@ const AdminDashboard = () => {
     <div className="flex w-fit h-fit gap-4">
       <button
         onClick={() => navigate("/add-police-station")} // Change route accordingly
-        className="px-4 py-2 flex items-center gap-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all"
+        className="cursor-pointer px-4 py-2 flex items-center gap-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all"
       >
         {/* ➕ */}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="white" className="w-5 h-10">
@@ -109,7 +149,7 @@ const AdminDashboard = () => {
 
       <button
         onClick={handleLogout}
-        className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
+        className="cursor-pointer px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
       >
         Logout
       </button>
@@ -119,25 +159,11 @@ const AdminDashboard = () => {
 </nav>
 
 
-
-
-      {/* <nav className="border-b top-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-            Admin Dashboard
-          </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
-          >
-            Logout
-          </button>
-        </div>
-      </nav> */}
+ 
 
       {/* Filters */}
       <main className="max-w-7xl mt-12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8 flex flex-wrap gap-4 items-center justify-between">
+        {/* <div className="mb-8 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 flex-col md:flex-row w-full">
           <input
           type="text"
@@ -149,7 +175,7 @@ const AdminDashboard = () => {
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+              className="cursor-pointer bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
             >
               <option value="">All Statuses</option>
               <option value="PENDING">Pending</option>
@@ -161,23 +187,74 @@ const AdminDashboard = () => {
             <select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+              className="cursor-pointer bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
             >
-              <option value="">All Types</option>
-              <option value="THEFT">Theft</option>
-              <option value="ASSAULT">Assault</option>
-              <option value="VANDALISM">Vandalism</option>
+          { REPORTCATEGORY?.map((item)=>{
+            return (
+              item === "" ?  <option value={item}>All Category </option> :
+              <option value={item}>{item} </option>
+            )
+           })
+
+          }
             </select>
           </div>
           <div className="text-neutral-400">{reports.length} Reports</div>
+        </div> */}
+        <div className="mb-8 flex flex-col md:flex-row flex-wrap gap-4 items-center justify-between">
+          <div className="flex gap-4 w-full flex flex-col md:flex-row">
+          <input
+          type="text"
+          name="reportName"
+          placeholder="Search by Title"
+          value={filters.reportName}
+          onChange={handleFilterChange}
+          className="border w-full text-sm w-full p-2 rounded w-1/3"
+        />
+            <select
+            name="status"
+              value={filters.status}
+              onChange={(e) =>
+    setFilters((prev) => ({ ...prev, status: e.target.value }))
+  }              className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+            >
+              <option value="">All Statuses</option>
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="RESOLVED">Resolved</option>
+              <option value="DISMISSED">Dismissed</option>
+            </select>
+
+            <select
+            name="type"
+  value={filters.type || ""}
+  onChange={handleFilterChange} className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+>
+ <option value="">All Types</option>
+  <option value="EMERGENCY">Emergency</option>
+  <option value="NON_EMERGENCY">Non Emergency</option>
+</select>
+            <select
+            name="category"
+  value={filters.category || ""}
+  onChange={handleFilterChange} className="bg-neutral-900 w-full border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
+>
+  <option value="">All Categories</option> {/* ✅ Default option */}
+  {REPORTCATEGORY?.map((item, index) => (
+    <option key={index} value={item}>
+      {item}
+    </option>
+  ))}
+</select>
+          </div>
+
+          <div className="text-neutral-400">{reports.length} Reports</div>
         </div>
          {/* Reports List */}
-{
-  reports  && ( 
-    <div className="grid mt-12 gap-4 sm:grid-cols-1 md:grid-cols-2">
-          {reports?.map((report) => (
+         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+          {reports.map((report) => (
             <div
-              key={report.id}
+              key={report._id}
               className="bg-neutral-900/50 backdrop-blur-sm rounded-xl p-6 border border-neutral-800 hover:border-neutral-700 transition-all"
             >
               <div className="flex justify-between items-start gap-6">
@@ -188,22 +265,58 @@ const AdminDashboard = () => {
                       {report.status}
                     </span>
                   </div>
+
                   <p className="text-neutral-400 text-sm">{report.description}</p>
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
-                    <span>📍 {report.location || "N/A"}</span>
+                    <span>📍 {report.address || "N/A"}</span>
                     <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
+                    <span> Category: {report.category || "N/A"}</span>
+                    <span
+                    className=""
+                    > Type: <span  className={`${
+    report.type ==="EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+  } p-2 rounded-lg font-semibold`}>{report.type || "N/A"} </span> </span>
                   </div>
+<div className="flex flex-col md:flex-row flex-wrap rounded-lg gap-2">
+<span className="text-sm text-neutral-200 p-1">Assigned Police Station: </span>
 
+<div className="bg-[#2f572f]/10 text-[#2f572f] border border-[#2f572f]/20 p-2 rounded-lg">
+<p>
+{report.assignedStation.name} , {report.assignedStation.district} ,{report.assignedStation.state}
+</p>
+
+<span>Contact: {report.assignedStation.email}</span>
+
+</div>
+
+</div>
                   {report.image && (
-                    <img src={report.image} alt="Report" className="mt-4 w-[20rem] h-[20rem] object-cover rounded-lg border border-neutral-800" />
+                    <img
+                      src={report.image}
+                      alt="Report"
+                      className="mt-4 w-[20rem] h-[20rem] object-cover rounded-lg border border-neutral-800"
+                    />
                   )}
-
+                  {report?.video ? (
+  <video
+  src={`${report?.video}`}
+    controls
+    className="mt-4 object-cover rounded-lg w-[200px] lg:w-[20rem] h-auto lg:h-[20rem] border border-neutral-800"
+  />
+) : (
+  <p className="text-neutral-500">Video not available</p>
+)} 
                   {report.files?.length > 0 && (
                     <div className="mt-4">
                       <h3 className="font-medium text-neutral-200">Download Evidence</h3>
                       <div className="space-y-2">
                         {report.files.map((file) => (
-                          <a key={file.id} href={file.filePath} download className="text-blue-500 hover:underline">
+                          <a
+                            key={file.id}
+                            href={file.filePath}
+                            download
+                            className="text-blue-500 hover:underline"
+                          >
                             {file.fileType.toUpperCase()} File
                           </a>
                         ))}
@@ -213,21 +326,24 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Status Update */}
-                <select
+                {/* <select
                   value={report.status}
-                  onChange={(e) => updateReportStatus(report.id, e.target.value)}
+                  onChange={(e) => updateReportStatus(report._id, e.target.value)}
                   className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
                 >
                   <option value="PENDING">Pending</option>
                   <option value="IN_PROGRESS">In Progress</option>
                   <option value="RESOLVED">Resolved</option>
                   <option value="DISMISSED">Dismissed</option>
-                </select>
+                </select> */}
               </div>
             </div>
           ))}
-        </div>) 
-}
+
+
+
+          
+        </div>
 {reports.length === 0 && (
   <div className="flex flex-col mx-auto p-10 items-center justify-center min-h-screen bg-neutral-900/50 rounded-xl border border-neutral-800 text-neutral-400 py-12">
     {console.log("No Reports Found! filteredReports.length =", reports.length)}
@@ -254,7 +370,33 @@ const AdminDashboard = () => {
     </p>
   </div>
 )}
-  
+
+
+         {/* Pagination */}
+<div className="flex justify-between font-bold mt-4">
+  <button
+    className={`border border-white px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${
+      page === 1 ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+    }`}
+    onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+    disabled={page === 1}
+  >
+    Previous
+  </button>
+
+  <span>Page {page}</span>
+
+  <button
+    className={`border border-white px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent ${
+      page * limit >= totalReports ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+    }`}
+    onClick={() => setPage((prev) => (prev * limit < totalReports ? prev + 1 : prev))}
+    disabled={page * limit >= totalReports}
+  >
+    Next
+  </button>
+</div>
+
        
       </main>
     </div>
