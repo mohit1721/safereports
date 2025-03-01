@@ -4,7 +4,9 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 const AddPoliceStation = () => {
-  const BASE_URL = "http://localhost:5000/api"
+  // https://safereports.onrender.com
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  //  || "http://localhost:5000/api" .....
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -93,19 +95,19 @@ const AddPoliceStation = () => {
 
   return (
 
-<div className="mt-16 p-11">
+<div className="mt-16">
 {/* bg gradiendt */}
 <div className="fixed inset-0 -z-10 min-h-screen">
         <div className="absolute inset-0 h-full bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.03),transparent_50%)]" />
         <div className="absolute inset-0 h-full bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.04),transparent_70%)]" />
       </div>
-      <div className="flex flex-row gap-8 justify-between">
+      <div className="flex flex-row justify-evenly w-full mt-4">
       <Link to="/admin-dashboard">
   <button className="bg-blue-500 p-2 cursor-pointer rounded-lg mx-auto">
     Go to Dashboard
   </button>
-</Link>      
-<p className="text-center user-select-none">Add Police Station</p>
+      </Link>      
+<p className="text-center user-selection-none">Add Police Station</p>
       </div>
      
       <div className="mt-8 mb-8 bg-zinc-900/50 rounded-2xl border border-white/5 p-6 mx-auto max-w-3xl relative px-6 pt-8 rounded-2xl bg-zinc-900 p-5">
@@ -220,8 +222,8 @@ const AddPoliceStation = () => {
 </div>
 
 
-      {/* Central Station Checkbox */}
-      <div className="flex items-center space-x-3">
+      {/* Central Station Checkbox -->*/}
+      {/* <div className="flex items-center space-x-3">
         <input
           type="checkbox"
           checked={formData.isCentral}
@@ -231,7 +233,7 @@ const AddPoliceStation = () => {
           className="w-5 h-5 accent-sky-500"
         />
         <label className="text-sm text-zinc-400">Central Police Station</label>
-      </div>
+      </div> */}
 
       {/* Submit Button */}
       <button

@@ -2,7 +2,7 @@ import { useEffect,useRef , useState } from "react";
 import { useNavigate } from "react-router-dom";
 import  {toast} from "react-hot-toast"
 import axios from "axios"
-const BASE_URL = "http://localhost:5000/api";
+// const BASE_URL = "http://localhost:5000/api";
 import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 
 // import 'video-react/dist/video-react.css'; //~ in new
@@ -27,7 +27,8 @@ const PoliceDashboard = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [totalReports, setTotalReports] = useState(0);
-
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  //  || "http://localhost:5000/api" .....
   const REPORTCATEGORY = [
     "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
     "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",

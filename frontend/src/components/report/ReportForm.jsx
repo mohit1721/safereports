@@ -8,7 +8,9 @@ import axios from "axios"
 // import crypto from "crypto";
 
 // const BASE_URL = process.env.REACT_APP_BASE_URL
-const BASE_URL = "http://localhost:5000/api"
+// const BASE_URL = "http://localhost:5000/api"
+const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+//  || "http://localhost:5000/api" .....
 const REPORTCATEGORY = [
   "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
   "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",
@@ -243,7 +245,8 @@ const handleImageUpload = async (e) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/report/create",
+        `${BASE_URL}/report/create`,
+        // "http://localhost:5000/api/report/create",
         formDataToSend,
         { headers: { "Content-Type": "multipart/form-data" } } // ✅ Correct headers for file upload
       );

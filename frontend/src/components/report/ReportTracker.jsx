@@ -7,7 +7,9 @@ export default function ReportTracker() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [reportDetails, setReportDetails] = useState(null);
-const BASE_URL = "http://localhost:5000/api"
+// const BASE_URL = "http://localhost:5000/api"
+const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  //  || "http://localhost:5000/api" .....
 const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");

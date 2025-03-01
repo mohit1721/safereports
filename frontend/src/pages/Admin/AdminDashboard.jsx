@@ -1,11 +1,13 @@
 import { useEffect, useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {toast} from "react-hot-toast"
-const BASE_URL = "http://localhost:5000/api";
+// const BASE_URL = "http://localhost:5000/api";
 import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 import axios from "axios"
 
 const AdminDashboard = () => {
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  //  || "http://localhost:5000/api" .....
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [page, setPage] = useState(1);
