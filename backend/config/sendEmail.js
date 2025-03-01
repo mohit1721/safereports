@@ -9,12 +9,14 @@ const sendEmail = async (to, subject, htmlContent) => {
                 pass: process.env.EMAIL_PASS,
             },
         });
-
+// http://localhost:5173/login
+const loginLink = "https://safetoreport.vercel.app/login";
         const mailOptions = {
             from: `"SafeReport Support" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html: htmlContent,
+            loginLink
         };
 
         await transporter.sendMail(mailOptions);

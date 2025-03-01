@@ -1,4 +1,4 @@
-const emailTemplatePoliceReport = (policeStationName, title, category, address) => {
+const emailTemplatePoliceReport = (loginLink , policeStationName, title, category, address) => {
     return `
     <html>
         <head>
@@ -42,7 +42,7 @@ const emailTemplatePoliceReport = (policeStationName, title, category, address) 
                     </div>
 
                     <p>Please take necessary action as soon as possible.</p>
-                    <p>Login to see Description of the report</p>
+                    <p>Login to see Description of the report:${loginLink} t</p>
                     <p>Thank you for your service.</p>
 
                     <p>Best Regards,</p>

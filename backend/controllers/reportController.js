@@ -184,11 +184,13 @@ const createReport = async (req, res) => {
 const policeStation =await PoliceStation.findByIdAndUpdate(assignedStation, {
     $push: { reports: report._id }
 });
-      
+const loginLink = "https://safetoreport.vercel.app/login";
+ 
   // ✅ Send Email to Assigned Police Station
   if (policeStation) {
     const { email, name } = policeStation;
-    const emailContent = emailTemplatePoliceReport(name, title, category, address);
+
+    const emailContent = emailTemplatePoliceReport(loginLink, name, title, category, address);
     await sendEmail(email, "🚨 New Report Assigned!", emailContent);
 }
 
