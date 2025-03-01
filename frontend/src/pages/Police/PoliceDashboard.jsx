@@ -27,7 +27,7 @@ const PoliceDashboard = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [totalReports, setTotalReports] = useState(0);
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
   //  || "http://localhost:5000/api" .....
   const REPORTCATEGORY = [
     "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",

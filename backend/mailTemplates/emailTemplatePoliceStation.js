@@ -9,7 +9,7 @@ const emailTemplatePoliceStation = (name, email, password, loginLink) => {
         <style>
           body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color:rgb(34, 34, 60);
             color: #333;
             margin: 0;
             padding: 0;
@@ -18,7 +18,7 @@ const emailTemplatePoliceStation = (name, email, password, loginLink) => {
             max-width: 600px;
             margin: 20px auto;
             padding: 20px;
-            background-color: #ffffff;
+            background-color:rgb(129, 131, 140);
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
           }

@@ -7,9 +7,9 @@ import {toast} from "react-hot-toast"
 import axios from "axios"
 // import crypto from "crypto";
 
-// const BASE_URL = process.env.REACT_APP_BASE_URL
+// const BASE_URL = import.meta.env.VITE_APP_BASE_URL
 // const BASE_URL = "http://localhost:5000/api"
-const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
 //  || "http://localhost:5000/api" .....
 const REPORTCATEGORY = [
   "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",

@@ -6,10 +6,10 @@ const emailTemplatePoliceReport = (policeStationName, title, category, address) 
                 .container {
                     font-family: Arial, sans-serif;
                     padding: 20px;
-                    background-color: #f8f9fa;
+                    background-color:rgb(51, 69, 88);
                 }
                 .email-body {
-                    background: white;
+                    background-color: #fff32;
                     padding: 20px;
                     border-radius: 8px;
                     box-shadow: 0px 0px 10px #ddd;

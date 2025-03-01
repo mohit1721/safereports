@@ -6,7 +6,7 @@ import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 import axios from "axios"
 
 const AdminDashboard = () => {
-  const BASE_URL = process.env.REACT_APP_BASE_URL || "https://safereports.onrender.com";
+  const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com";
   //  || "http://localhost:5000/api" .....
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
