@@ -10,8 +10,8 @@ const sendPoliceStationCredentials = async (email, name, password) => {
                 pass: process.env.EMAIL_PASS,
             },
         });
-// police-station/login
-        const loginLink = "http://localhost:3000/police-station/login";
+// http://localhost:5173/login
+        const loginLink = "https://safetoreport.vercel.app/login";
 
         const mailOptions = {
             from: ` "SafeReport Support" <${process.env.EMAIL_USER}`,
