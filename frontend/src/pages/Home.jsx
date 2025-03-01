@@ -23,7 +23,7 @@ export default function Home() {
             Make your community safer without compromising your safety. Our advanced encryption ensures your identity remains completely anonymous.
           </p>
           
-          <div className="mt-10 flex flex-col sm:flex-row gap-4">
+          <div className="mt-10 flex mx-auto items-center flex-col sm:flex-row gap-4">
             <Link to="/submit-report">
               <button className="group relative flex h-12 items-center justify-center gap-2 rounded-xl bg-sky-500 px-8 text-sm font-medium text-white transition-all hover:bg-sky-400">
                 Make Anonymous Report

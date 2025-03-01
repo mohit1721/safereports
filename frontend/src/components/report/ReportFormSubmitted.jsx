@@ -7,7 +7,7 @@ function ReportSubmitted({ data }) {
 console.log("Report ID ->", reportId)
   const handleShare = (reportId) => {
     copy(reportId);
-    toast.success("Report ID Copied . Save it for Tracking the Report"); // Using alert for simplicity
+    toast.success("Report ID Copied "); // Using alert for simplicity
   };
 
   return (
@@ -42,7 +42,7 @@ console.log("Report ID ->", reportId)
           <code className="text-sky-400">{reportId}</code>
           <div className="text-center">
             <button
-              className="mx-auto flex items-center pointer-cursor gap-2 py-6 text-yellow-100"
+              className="mx-auto flex items-center cursor-pointer gap-2 py-6 text-yellow-100"
               onClick={() => handleShare(reportId)}
             >
               <GrCopy size={15} />

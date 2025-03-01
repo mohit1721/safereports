@@ -5,7 +5,8 @@ const {uploadToCloudinary} = require("../config/cloudinaryConfig.js")
 const axios = require("axios");
 const { v4: uuidv4 } = require('uuid');
 const formidable = require('formidable');
-
+const sendEmail = require("../config/sendEmail.js");
+const emailTemplatePoliceReport = require ("../mailTemplates/emailTemplatePoliceReport.js")
  
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const convertToBase64 = async (fileUrl) => {
@@ -180,10 +181,18 @@ const createReport = async (req, res) => {
 
         await report.save();
 // ✅ PoliceStation Model me bhi Report add karo
-await PoliceStation.findByIdAndUpdate(assignedStation, {
+const policeStation =await PoliceStation.findByIdAndUpdate(assignedStation, {
     $push: { reports: report._id }
 });
-       return res.status(201).json({
+      
+  // ✅ Send Email to Assigned Police Station
+  if (policeStation) {
+    const { email, name } = policeStation;
+    const emailContent = emailTemplatePoliceReport(name, title, category, address);
+    await sendEmail(email, "🚨 New Report Assigned!", emailContent);
+}
+
+return res.status(201).json({
             success:true, message: "Report created successfully",
             report,
         });

@@ -169,9 +169,9 @@ const PoliceDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white mt-16">
       {/* Navbar */}
-      <nav className="border-b mt-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0">
+      <div className="border-b border-neutral-800 bg-black/50 backdrop-blur-xl ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex flex-col md:flex-row items-center gap-4">
       <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
@@ -188,7 +188,7 @@ const PoliceDashboard = () => {
             Logout
           </button>
         </div>
-      </nav>
+      </div>
 
       {/* Filters */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

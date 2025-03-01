@@ -39,16 +39,19 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     console.log("Filters Applied:", filters); // ✅ Debugging filters
+  
     if (!fetchReportsRef.current) {
       fetchReportsRef.current = debounce(async (filters) => {
         setIsLoading(true);
         try {
+          // ✅ Remove Empty Filters to Avoid Extra Query Params
           const validFilters = Object.fromEntries(
             Object.entries(filters).filter(([_, v]) => v !== "")
           );
+  
           const queryParams = new URLSearchParams({ ...validFilters, page, limit }).toString();
-          console.log("Query Params:", queryParams); // Debugging
-          // const queryParams = new URLSearchParams(validFilters).toString();
+          console.log("Query Params:", queryParams); // ✅ Debugging Query Params
+  
           const token = localStorage.getItem("token");
   
           console.log("Fetching reports with query:", queryParams); // ✅ Check Query Params
@@ -65,7 +68,7 @@ const AdminDashboard = () => {
           console.log("Fetched Reports:", data.reports); // ✅ Debugging API response
           setReports(data.reports || []);
           setTotalReports(data.totalReports);
-
+  
         } catch (error) {
           toast.error(error.message);
           console.error("Error fetching reports:", error);
@@ -75,7 +78,8 @@ const AdminDashboard = () => {
     }
   
     fetchReportsRef.current(filters);
-  }, [filters,page]);
+  }, [filters, page]); // ✅ Re-fetch when filters or page change
+  
   const handleFilterChange = (e) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -124,9 +128,9 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white mt-16">
       {/* Navbar */}
-      <nav className="border-b top-16 border-neutral-800 bg-black/50 backdrop-blur-xl sticky top-0">
+      <div className="border-b border-neutral-800 bg-black/50 backdrop-blur-xl">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
     
     {/* 📌 Admin Dashboard Title */}
@@ -156,7 +160,7 @@ const AdminDashboard = () => {
     </div>
 
   </div>
-</nav>
+</div>
 
 
  
@@ -205,11 +209,11 @@ const AdminDashboard = () => {
           <div className="flex gap-4 w-full flex flex-col md:flex-row">
           <input
           type="text"
-          name="reportName"
-          placeholder="Search by Title"
-          value={filters.reportName}
+          name="search"
+          placeholder="Search by Report Title or Police Station Name..."
+          value={filters.search}
           onChange={handleFilterChange}
-          className="border w-full text-sm w-full p-2 rounded w-1/3"
+          className="border w-full text-xs w-full p-2 rounded w-1/3"
         />
             <select
             name="status"

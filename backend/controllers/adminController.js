@@ -102,7 +102,7 @@ const getAllReports = async (req, res) => {
         // ✅ Efficient Index-based Filtering
         if (status) filter.status = status;
         if (type) filter.type = type;
-
+// 🔍 Search by Report Title OR Police Station Name
         if (search) {
             const policeStations = await PoliceStation.find({
                 name: { $regex: search, $options: "i" }
@@ -123,11 +123,12 @@ const getAllReports = async (req, res) => {
             .skip((page - 1) * limit)
             .limit(parseInt(limit))
             .lean();
-
+// ✅ Total Count for Pagination
+const totalReports = await Report.countDocuments(filter);
         // ✅ Response
        return res.status(200).json({
             success: true,
-            totalReports: reports.length,
+            totalReports,
             reports,
         });
 
