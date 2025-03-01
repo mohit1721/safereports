@@ -13,8 +13,8 @@ const nearestPoliceStationLimiter = rateLimit({
 // ✅ Validation Middleware
 
   
-router.get("/reports/police-station", protect, getReportsForPolice); // ✅ Only Logged-in Police
-router.patch("/status/:reportId", protect, updateReportStatus); // ✅ Only Police Can Update Status
+router.get("/reports/police-station" ,protect, getReportsForPolice); // ✅ Only Logged-in Police
+router.put("/status/:reportId", protect, updateReportStatus); // ✅ Only Police Can Update Status
 // Route to find nearest police stations
 router.get("/nearest",nearestPoliceStationLimiter,getNearestPoliceStations);
 router.get("/police/:id", getPoliceStationById);

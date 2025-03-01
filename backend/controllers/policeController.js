@@ -47,46 +47,95 @@ const MAX_DISTANCE = 50000; // 50 km (fixed)
 // };
 
 // ✅ Update Report Status (Only Logged-in Police)
+// const updateReportStatus = async (req, res) => {
+//     try {
+//         const { reportId } = req.params;
+//         const { status } = req.body;
+
+//         // ✅ Check if the user is a Police
+//         if (req.user.role !== "POLICESTATION" ) {
+//             return res.status(403).json({ success: false, message: "Access Denied! Only Police can update report status." });
+//         }
+// // ✅ Validate Police Station ID
+// // if (!req.user.policeStationId) {
+// //     return res.status(400).json({ success: false, message: "Your account is not linked to any police station." });
+// // }
+//         // ✅ Fetch Report & Ensure it Belongs to the Police Station
+//         const report = await Report.findById(reportId);
+//         if (!report) {
+//             return res.status(404).json({ success: false, message: "Report not found!" });
+//         }
+
+//         // ✅ Ensure Report Belongs to the Logged-in Police Station
+//         if (report.assignedStation.toString() !== req.user.policeStationId.toString()) {
+//             return res.status(403).json({ success: false, message: "You can only update reports assigned to your police station!" });
+//         }
+
+//         // ✅ Update Report Status
+//         report.status = status;
+//         await report.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Report status updated successfully!",
+//             updatedReport: report,
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: "Error updating report status", error: error.message });
+//     }
+// };
+
 const updateReportStatus = async (req, res) => {
-    try {
-        const { reportId } = req.params;
-        const { status } = req.body;
+  try {
+      const { reportId } = req.params;
+      const { status } = req.body;
 
-        // ✅ Check if the user is a Police
-        if (req.user.role !== "POLICESTATION" && !req.user.policeStationId) {
-            return res.status(403).json({ success: false, message: "Access Denied! Only Police can update report status." });
-        }
-// ✅ Validate Police Station ID
-// if (!req.user.policeStationId) {
-//     return res.status(400).json({ success: false, message: "Your account is not linked to any police station." });
-// }
-        // ✅ Fetch Report & Ensure it Belongs to the Police Station
-        const report = await Report.findById(reportId);
-        if (!report) {
-            return res.status(404).json({ success: false, message: "Report not found!" });
-        }
+      // ✅ Ensure Status is Provided
+      if (!status) {
+          return res.status(400).json({ success: false, message: "Status is required to update the report." });
+      }
 
-        // ✅ Ensure Report Belongs to the Logged-in Police Station
-        if (report.assignedStation.toString() !== req.user.policeStationId.toString()) {
-            return res.status(403).json({ success: false, message: "You can only update reports assigned to your police station!" });
-        }
+      // ✅ Check if the user is a Police
+      if (!req.user || req.user.role !== "POLICESTATION") {
+          return res.status(403).json({ success: false, message: "Access Denied! Only Police can update report status." });
+      }
 
-        // ✅ Update Report Status
-        report.status = status;
-        await report.save();
+      // ✅ Validate Police Station ID
+      if (!req.user.policeStationId) {
+          return res.status(400).json({ success: false, message: "Your account is not linked to any police station." });
+      }
 
-        res.status(200).json({
-            success: true,
-            message: "Report status updated successfully!",
-            updatedReport: report,
-        });
+      // ✅ Fetch Report & Ensure it Exists
+      const report = await Report.findById(reportId);
+      if (!report) {
+          return res.status(404).json({ success: false, message: "Report not found!" });
+      }
 
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Error updating report status", error: error.message });
-    }
+      // ✅ Ensure Report Belongs to the Logged-in Police Station
+      if (!report.assignedStation || report.assignedStation.toString() !== req.user.policeStationId.toString()) {
+          return res.status(403).json({ success: false, message: "You can only update reports assigned to your police station!" });
+      }
+
+      // ✅ Update Report Status
+      report.status = status;
+      await report.save();
+
+      return res.status(200).json({
+          success: true,
+          message: "Report status updated successfully!",
+          updatedReport: report,
+      });
+
+  } catch (error) {
+      console.error("Error updating report status:", error.message);
+      return res.status(500).json({ success: false, message: "Error updating report status", error: error.message });
+  }
 };
+
 const getReportsForPolice = async (req, res) => {
   try {
+    console.log("police get reports")
       if (req.user.role !== "POLICESTATION") {
           return res.status(403).json({ success: false, message: "Access Denied! Only Police can view reports." });
       }
@@ -106,15 +155,16 @@ const getReportsForPolice = async (req, res) => {
       const reports = await Report.find(filter)
           .populate("assignedStation", "name email district state")
           .skip((page - 1) * limit)
-          .limit(parseInt(limit));
+          .limit(parseInt(limit)).sort({createdAt : -1})
 
-      res.status(200).json({
+    return res.status(200).json({
           success: true,
           totalReports,
           reports,
+          message: `Reports fetched successfully for ${req.user.name} `
       });
   } catch (error) {
-      res.status(500).json({ success: false, message: "Error fetching reports", error: error.message });
+     return res.status(500).json({ success: false, message: "Error fetching reports", error: error.message });
   }
 };
 // GGOD

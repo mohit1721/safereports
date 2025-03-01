@@ -31,7 +31,7 @@ const AdminDashboard = () => {
         );
         const queryParams = new URLSearchParams(validFilters).toString();
 
-        const response = await fetch(`${BASE_URL}/report/reports/admin?${queryParams}`);
+        const response = await fetch(`${BASE_URL}/admin/reports/admin?${queryParams}`);
         const data = await response.json();
         setReports(data.reports || []);
       } catch (error) {

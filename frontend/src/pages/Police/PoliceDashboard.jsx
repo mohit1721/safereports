@@ -4,6 +4,19 @@ import  {toast} from "react-hot-toast"
 import axios from "axios"
 const BASE_URL = "http://localhost:5000/api";
 
+// import 'video-react/dist/video-react.css'; //~ in new
+// import {
+//   BigPlayButton,
+//   ControlBar,
+//   CurrentTimeDisplay,
+//   ForwardControl,
+//   PlayToggle,
+//   PlaybackRateMenuButton,
+//   Player,
+//   ReplayControl,
+//   TimeDivider,
+//   VolumeMenuButton
+// } from "video-react";
 const PoliceDashboard = () => {
   const navigate = useNavigate();
   const [reports, setReports] = useState([]);
@@ -40,17 +53,18 @@ const PoliceDashboard = () => {
         );
         const queryParams = new URLSearchParams(validFilters).toString();
         const token = localStorage.getItem("token"); // 🔥 Get token from localStorage
+        console.log("going Response for logged in station")
 
         // const response = await fetch(`${BASE_URL}/report/reports/police-station?${queryParams}`);
-        const data = await axios.get(`${BASE_URL}/report/reports/police-station?${queryParams}`, {
+        const data = await axios.get(`${BASE_URL}/police/reports/police-station?${queryParams}`, {
           headers: {
             "Authorization": `Bearer ${token}`, // 🔥 Include token
             "Content-Type": "application/json",
           }
         });
-        
+        console.log("Response for logged in station",data)
           // ✅ Check if response is actually JSON
-    const contentType = response.headers.get("content-type");
+    const contentType = data.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       throw new Error("Invalid response format. Received HTML instead of JSON.");
     }
@@ -66,7 +80,7 @@ const PoliceDashboard = () => {
     };
 
     fetchReports();
-  }, []);
+  }, [filters]);
 
   // 📌 Status Color Function
   const getStatusColor = (status) => {
@@ -82,25 +96,44 @@ const PoliceDashboard = () => {
   // 📌 Update Report Status
   const updateReportStatus = async (reportId, newStatus) => {
     try {
-      const response = await fetch(`${BASE_URL}/report/status/${reportId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+      const token = localStorage.getItem("token"); // 🔥 Get token from localStorage
+  
+      if (!token) {
+        console.error("No token found! User not authenticated.");
+        return;
+      }
+  
+      const response = await fetch(`${BASE_URL}/police/status/${reportId}`, {
+        method: "PUT",
+        headers: { 
+          "Authorization": `Bearer ${token}`, // ✅ Include token
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ status: newStatus }),
       });
-
-      if (response.ok) {
-        setReports((prevReports) =>
-          prevReports.map((report) =>
-            report.id === reportId ? { ...report, status: newStatus } : report
-          )
-        );
-      } else {
-        console.error("Failed to update status");
+  
+      const data = await response.json(); // ✅ Parse response JSON safely
+  
+      if (!data.success) {
+        console.error("Failed to update status:", data.message || "Unknown error");
+        return;
       }
+  
+      // ✅ Update state if successful
+      setReports((prevReports) =>
+        prevReports.map((report) =>
+          report._id === reportId ? { ...report, status: newStatus } : report
+        )
+      );
+  
+      console.log("Report status updated successfully!");
+  
     } catch (error) {
-      console.error("Error updating status:", error);
+      toast.error(error.message)
+      console.log("Error updating status:", error.message);
     }
   };
+  
 
   // 📌 Show Loading Spinner
   if (isLoading) {
@@ -175,7 +208,7 @@ const PoliceDashboard = () => {
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
           {reports.map((report) => (
             <div
-              key={report.id}
+              key={report._id}
               className="bg-neutral-900/50 backdrop-blur-sm rounded-xl p-6 border border-neutral-800 hover:border-neutral-700 transition-all"
             >
               <div className="flex justify-between items-start gap-6">
@@ -189,7 +222,7 @@ const PoliceDashboard = () => {
 
                   <p className="text-neutral-400 text-sm">{report.description}</p>
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
-                    <span>📍 {report.location || "N/A"}</span>
+                    <span>📍 {report.address || "N/A"}</span>
                     <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
                   </div>
 
@@ -200,7 +233,15 @@ const PoliceDashboard = () => {
                       className="mt-4 w-[20rem] h-[20rem] object-cover rounded-lg border border-neutral-800"
                     />
                   )}
-
+                  {report?.video ? (
+  <video
+  src={`${report?.video}`}
+    controls
+    className="mt-4 object-cover rounded-lg w-[200px] lg:w-[20rem] h-auto lg:h-[20rem] border border-neutral-800"
+  />
+) : (
+  <p className="text-neutral-500">Video not available</p>
+)} 
                   {report.files?.length > 0 && (
                     <div className="mt-4">
                       <h3 className="font-medium text-neutral-200">Download Evidence</h3>
@@ -223,7 +264,7 @@ const PoliceDashboard = () => {
                 {/* Status Update */}
                 <select
                   value={report.status}
-                  onChange={(e) => updateReportStatus(report.id, e.target.value)}
+                  onChange={(e) => updateReportStatus(report._id, e.target.value)}
                   className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
                 >
                   <option value="PENDING">Pending</option>
