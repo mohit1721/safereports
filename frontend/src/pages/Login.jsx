@@ -46,6 +46,7 @@ const [isLoading, setIsLoading] = useState(false)
         <h1 className="text-center text-3xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent mb-2">
           Welcome Back
         </h1>
+        <p className="text-center text-sm text-neutral-400">Only Police and Admin can login</p>
         <h2 className="text-center text-sm text-neutral-400">
           Sign in to access your admin dashboard
         </h2>

@@ -49,12 +49,15 @@ export default function Navbar() {
 
             {/* Emergency & Mobile Menu Button */}
             <div className="flex items-center space-x-4 ">
-              <Link href="/contact" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
+              <Link to="/contact" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
                 Contact
+              </Link>
+              <Link to="/login" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
+                Login
               </Link>
               <button className="group hidden md:block flex h-9 items-center gap-2 rounded-full bg-red-500/10 pl-4 pr-5 text-sm font-medium text-red-500 ring-1 ring-inset ring-red-500/20 transition-all hover:bg-red-500/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                <Link href="tel:112">Emergency: 112</Link>
+                <Link to="tel:112">Emergency: 112</Link>
               </button>
 
               {/* Mobile Menu Button */}
