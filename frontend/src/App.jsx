@@ -31,12 +31,12 @@ return(
   <Route path="/" element={<Home/>} />
   <Route path="/contact" element={<Contact />} />
   <Route path="/resources" element={<Resources />} />
-  <Route path="/contact" element={<Contact />} />
+  <Route path="/contact" element={<Contact/>} />
   <Route path="/how-it-works" element={<HowItWorks/>} />
   <Route path="/submit-report" element={<SubmitReport/>} />
   <Route path="/track-report" element={<TrackReport/>} />
 
-  <Route path="/login" element={ <Login /> }/>
+  <Route path="/login" element={ <Login/> }/>
 
 
   <Route
