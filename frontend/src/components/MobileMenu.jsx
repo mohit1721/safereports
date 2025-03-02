@@ -36,6 +36,9 @@ export default function MobileMenu({ isOpen, onClose }) {
               <Link to="/contact" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
                 Contact
               </Link>
+              <Link to="/login" className="text-sm text-zinc-400 hover:text-white transition-colors" onClick={onClose}>
+                Login
+              </Link>
             </nav>
           </div>
         </div>
