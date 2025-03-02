@@ -12,6 +12,9 @@
 
 ![Image](https://github.com/user-attachments/assets/0540fd65-c8e3-4819-9963-4eb36a4b4bc6)
 
+![Image](https://github.com/user-attachments/assets/479a2109-5da1-49f8-ae64-1f8a2760c5be) ![Image](https://github.com/user-attachments/assets/81c98cf1-2d28-4ae3-8635-9d04f261273e)
+
+
 [LIVE](([url](https:safetoreport.vercel.app)))
 ---
 
