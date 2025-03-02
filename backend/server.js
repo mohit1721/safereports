@@ -30,7 +30,7 @@ app.use("/api/report", reportRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/analyze",analyzeRoutes);
-app.use("api",contactRoutes);
+app.use("/api",contactRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

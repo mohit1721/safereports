@@ -58,3 +58,5 @@ const contactEmailTemplate = (name, email, message) => {
     </html>
     `;
 };
+
+module.exports = contactEmailTemplate

@@ -1,7 +1,9 @@
 const nodemailer = require('nodemailer');
-const contactEmailTemplate =require("../mailTemplates/contactMailTemplate")
+const contactEmailTemplate = require("../mailTemplates/contactMailTemplate")
 const sendContactEmail = async (req, res) => {
+    console.log("contact req from fe", req.body)
     try {
+        // console.log("contact req from fe", req.body)
         const { name, email, message } = req.body;
 
         // Validate request data
@@ -33,7 +35,7 @@ const sendContactEmail = async (req, res) => {
         return res.status(200).json({success: true, message: 'Your message has been sent successfully!' });
     } catch (error) {
         console.error('Error sending email:', error);
-        return res.status(500).json({success: true, message: 'Failed to send message' });
+        return res.status(500).json({success: false, message: 'Failed to send message' });
     }
 };
 
