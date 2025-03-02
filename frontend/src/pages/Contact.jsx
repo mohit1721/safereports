@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-const BASE_URL = "http://localhost:5000/api";
-
+// const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
