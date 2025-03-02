@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const connectDB = require("./config/db.js");
+const contactRoutes = require("./routes/contactRoutes.js")
 const authRoutes = require("./routes/authRoutes.js");
 const reportRoutes = require("./routes/reportRoutes.js");
 const adminRoutes = require("./routes/adminRoutes.js");
@@ -29,6 +30,7 @@ app.use("/api/report", reportRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/police", policeRoutes);
 app.use("/api/analyze",analyzeRoutes);
+app.use("api",contactRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

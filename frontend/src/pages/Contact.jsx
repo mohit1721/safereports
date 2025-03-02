@@ -1,5 +1,8 @@
 'use client'
 import React, { useState } from 'react';
+import axios from 'axios';
+
+const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +12,7 @@ const Contact = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,13 +39,20 @@ const Contact = () => {
     setErrors(newErrors);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     Object.keys(formData).forEach((key) => validateField(key, formData[key]));
+
     if (Object.keys(errors).length === 0) {
-      console.log(formData);
-      // Handle form submission
+      try {
+        const response = await axios.post(`${BASE_URL}/contact`, formData);
+        setSuccessMessage(response.data.message);
+        setFormData({ name: '', email: '', message: '' });
+      } catch (error) {
+        console.error('Error sending contact form:', error);
+        setErrors({ general: 'Failed to send message. Try again later.' });
+      }
     }
   };
 
@@ -49,6 +60,9 @@ const Contact = () => {
     <div className="bg-black-900 mt-12 mx-auto w-[50%] h-fit text-white">
       <div className="container p-11 mx-auto py-16 px-6">
         <h1 className="text-3xl font-bold mb-8">Contact Us</h1>
+
+        {successMessage && <p className="text-green-500">{successMessage}</p>}
+        {errors.general && <p className="text-red-500">{errors.general}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {['name', 'email', 'message'].map((field) => (
