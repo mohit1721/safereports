@@ -245,7 +245,7 @@ export default function HowItWorks() {
               Ready to Make a Report?
             </h2>
             <Link to="/submit-report">
-            <button className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-sky-500 px-8 text-sm font-medium text-white transition-all hover:bg-sky-400">
+            <button className="group cursor-pointer relative inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-sky-500 px-8 text-sm font-medium text-white transition-all hover:bg-sky-400">
               Start Anonymous Report
               <svg
                 className="h-4 w-4 transition-transform group-hover:translate-x-0.5"

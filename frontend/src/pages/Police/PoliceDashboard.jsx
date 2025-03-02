@@ -184,7 +184,7 @@ const PoliceDashboard = () => {
     </div>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
+            className="px-4 cursor-pointer py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
           >
             Logout
           </button>

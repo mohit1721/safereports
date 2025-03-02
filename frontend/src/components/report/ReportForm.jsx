@@ -530,7 +530,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() => setFormData((prev) => ({ ...prev, incidentType: "EMERGENCY" }))}
-          className={`p-6 rounded-2xl border-2 transition-all duration-200 ${formData.incidentType === "EMERGENCY" ? "bg-red-500/20 border-red-500 shadow-lg shadow-red-500/20" : "bg-zinc-900/50 border-zinc-800 hover:bg-red-500/10 hover:border-red-500/50"}`}
+          className={`p-6 cursor-pointer rounded-2xl border-2 transition-all duration-200 ${formData.incidentType === "EMERGENCY" ? "bg-red-500/20 border-red-500 shadow-lg shadow-red-500/20" : "bg-zinc-900/50 border-zinc-800 hover:bg-red-500/10 hover:border-red-500/50"}`}
         >
           <div className="flex flex-col items-center space-y-2">
             <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -543,7 +543,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() => setFormData((prev) => ({ ...prev, incidentType: "NON_EMERGENCY" }))}
-          className={`p-6 rounded-2xl border-2 transition-all duration-200 ${formData.incidentType === "NON_EMERGENCY" ? "bg-orange-500/20 border-orange-500 shadow-lg shadow-orange-500/20" : 
+          className={`p-6 cursor-pointer rounded-2xl border-2 transition-all duration-200 ${formData.incidentType === "NON_EMERGENCY" ? "bg-orange-500/20 border-orange-500 shadow-lg shadow-orange-500/20" : 
           "bg-zinc-900/50 border-zinc-800 hover:bg-orange-500/10 hover:border-orange-500/50"}`}>
           {/* </button> */}
           <div className="flex flex-col items-center space-y-2">
@@ -652,7 +652,7 @@ className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 px-4 py-3.5
     <button
       type="button"
       onClick={handleUseCurrentLocation}
-      className="p-3 rounded-2xl border-2 transition-all duration-200 text-sky-500 border-sky-500/50 bg-sky-500/10 hover:bg-sky-500/20 shadow-lg shadow-sky-500/10"
+      className="p-3 cursor-pointer rounded-2xl border-2 transition-all duration-200 text-sky-500 border-sky-500/50 bg-sky-500/10 hover:bg-sky-500/20 shadow-lg shadow-sky-500/10"
     >
       Use Location
     </button>
@@ -724,7 +724,7 @@ className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 px-4 py-3.5
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 
+        className="w-full cursor-pointer relative group overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 
                  px-4 py-3.5 text-sm font-medium text-white shadow-lg
                  transition-all duration-200 hover:from-sky-400 hover:to-blue-500
                  disabled:opacity-50 disabled:cursor-not-allowed"

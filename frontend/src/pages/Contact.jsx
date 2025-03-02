@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import {toast} from "react-hot-toast"
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
 
 const Contact = () => {
@@ -47,13 +47,15 @@ const Contact = () => {
     if (Object.keys(errors).length === 0) {
       try {
         setIsSubmitting(true)
-        const response = await axios.post(`${BASE_URL}/contact`, formData);
+        const response = await axios.post(`${BASE_URL}/contact`, formData,{
+          headers: { 'Content-Type': 'application/json' },
+        });
         setIsSubmitting(false)
         setSuccessMessage(response.data.message);
-     
+        toast.success(response.data.message)
         setFormData({ name: '', email: '', message: '' });
       } catch (error) {
-        console.error('Error sending contact form:', error);
+        console.log('Error sending contact form:', error);
         setErrors({ general: 'Failed to send message. Try again later.' });
       }
     }
@@ -102,7 +104,7 @@ const Contact = () => {
   type="submit"
   disabled={isSubmitting}
   aria-live="assertive"
-  className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 
+  className="w-full cursor-pointer relative group overflow-hidden rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 
            px-4 py-3.5 text-sm font-medium text-white shadow-lg
            transition-all duration-200 hover:from-sky-400 hover:to-blue-500
            disabled:opacity-50 disabled:cursor-not-allowed"

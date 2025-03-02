@@ -30,10 +30,10 @@ const sendContactEmail = async (req, res) => {
         // Send email
         await transporter.sendMail(mailOptions);
 
-        return res.status(200).json({ message: 'Your message has been sent successfully!' });
+        return res.status(200).json({success: true, message: 'Your message has been sent successfully!' });
     } catch (error) {
         console.error('Error sending email:', error);
-        return res.status(500).json({ error: 'Failed to send message' });
+        return res.status(500).json({success: true, message: 'Failed to send message' });
     }
 };
 

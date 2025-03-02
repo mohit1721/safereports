@@ -96,7 +96,7 @@ export function LocationInput({ value, onChange, onCoordinatesChange }) {
         <button
           type="button"
           onClick={getLocation}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isGettingLocation}
           title="Get current location"
         >
