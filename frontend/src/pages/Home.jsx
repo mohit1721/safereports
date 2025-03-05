@@ -81,6 +81,13 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+{/*       disclaimer */}
+        <footer className="text-center text-sm text-gray-500 mt-4">
+      <p>
+        <strong>Disclaimer:</strong> SafeReport is developed solely for learning and project demonstration purposes. It is not affiliated with or managed by any government or law enforcement agency.
+      </p>
+    </footer>
     </main>
   );
 }
