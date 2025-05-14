@@ -14,6 +14,9 @@
 
 ![Image](https://github.com/user-attachments/assets/07a6ac89-bc58-4e81-9d61-dc4357c81806)
 
+# DB Design
+![Image](https://github.com/user-attachments/assets/eea273b0-9b7d-4471-95d4-e4c8d1730db1)
+
 [LIVE](([url](https:safetoreport.vercel.app)))
 ---
 
