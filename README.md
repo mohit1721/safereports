@@ -3,27 +3,18 @@
 # 🛡️ [Anonymous Reporting App]([url](https:safetoreport.vercel.app))  
 
 [A secure platform for anonymous incident reporting.]([url](https:safetoreport.vercel.app))
-
-![Image](https://github.com/user-attachments/assets/18fc51f2-e6b3-4457-9707-90afaf8c7515)
-
-![Image](https://github.com/user-attachments/assets/832b618b-7313-4d11-b032-3650f75e4a0d)
-
-![Image](https://github.com/user-attachments/assets/33e8ba23-bace-4b4b-bb30-342a43a066b0)
-
-![Image](https://github.com/user-attachments/assets/0540fd65-c8e3-4819-9963-4eb36a4b4bc6)
-
-![Image](https://github.com/user-attachments/assets/07a6ac89-bc58-4e81-9d61-dc4357c81806)
-
-[LIVE](([url](https:safetoreport.vercel.app)))
----
-
 ## 📋 Table of Contents  
 - [🤖 Introduction](#-introduction)  
 - [⚙️ Tech Stack](#-tech-stack)  
 - [🔋 Features](#-features)  
-- [🤸 Quick Start](#-quick-start)  
+- [🤸 Quick Start](#-quick-start)
+- [🛢️DB Design](#db-design)
 - [🕸️ Environment Setup](#-environment-setup)  
-- [🚀 Deployment](#-deployment)  
+- [🚀 Deployment](#-deployment)
+
+[LIVE](([url](https:safetoreport.vercel.app)))
+---
+
 
 ---
 
@@ -56,7 +47,19 @@ This is a state-of-the-art **anonymous reporting system** built with **Next.js 1
 - **AI-Powered Insights:** Integrated with GeminiAI for advanced reporting.  
 
 ---
+![Image](https://github.com/user-attachments/assets/18fc51f2-e6b3-4457-9707-90afaf8c7515)
 
+![Image](https://github.com/user-attachments/assets/832b618b-7313-4d11-b032-3650f75e4a0d)
+
+![Image](https://github.com/user-attachments/assets/33e8ba23-bace-4b4b-bb30-342a43a066b0)
+
+![Image](https://github.com/user-attachments/assets/0540fd65-c8e3-4819-9963-4eb36a4b4bc6)
+
+![Image](https://github.com/user-attachments/assets/07a6ac89-bc58-4e81-9d61-dc4357c81806)
+
+# DB Design
+![Image](https://github.com/user-attachments/assets/eea273b0-9b7d-4471-95d4-e4c8d1730db1)
+---
 ## 🤸 Quick Start  
 ### Prerequisites  
 Make sure you have the following installed:  
