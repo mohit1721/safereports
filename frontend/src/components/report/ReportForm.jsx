@@ -11,6 +11,7 @@ import axios from "axios"
 // const BASE_URL = "http://localhost:5000/api"
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
 //  || "http://localhost:5000/api" .....
+// const BASE_URL = "http://localhost:5000/api" //for localhost
 const REPORTCATEGORY = [
   "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
   "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",
@@ -462,7 +463,7 @@ const handleUseCurrentLocation = () => {
           `${BASE_URL}/police/nearest?latitude=${latitude}&longitude=${longitude}`
         );
         const data = await response.json();
-
+        console.log("ps data " , data)
         if (!data?.nearestStation && (!data?.options || data.options.length === 0)) {
           toast.error("No nearby police station found.");
           return;
@@ -472,10 +473,10 @@ const handleUseCurrentLocation = () => {
           setFormData((prev) => ({
             ...prev,
             assignedStation: {
-              _id: data.nearestStation._id,
-              name: data.nearestStation.name || "Unknown",
-              district: data.nearestStation.district || "Unknown",
-              state: data.nearestStation.state || "Unknown",
+              _id: data?.nearestStation._id,
+              name: data?.nearestStation?.name || "Unknown",
+              district: data?.nearestStation?.district || "Unknown",
+              state: data?.nearestStation?.state || "Unknown",
             },
           }));
         }

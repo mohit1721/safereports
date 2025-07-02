@@ -56,7 +56,7 @@ const analyzeImage = async (req, res) => {
     try {
    
       const { image } = req.body; // Base64 string from frontend
-  
+  // console.log("req coming from client")
       if (!image) {
         return res.status(400).json({ error: "No image data received!" });
       }
@@ -75,14 +75,16 @@ const analyzeImage = async (req, res) => {
         prompt,
         { inlineData: { data: base64Image, mimeType: "image/jpeg" } },
       ]);
-  
+      console.log("img analysys res")
       const text = await result.response.text();
       const extractedData = extractAnalysis(text);
-  
-      res.json(extractedData); // ✅ Send extracted data as JSON
+
+  // console.log("extracted data img", extractedData)
+
+     return res.json(extractedData); // ✅ Send extracted data as JSON
     } catch (error) {
       console.log("Error analyzing image:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+     return res.status(500).json({ error: "Internal Server Error" });
     }
   };
   

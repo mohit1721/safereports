@@ -204,7 +204,7 @@ const getNearestPoliceStations = async (req, res) => {
         if (!centralStation) {
           return res.status(404).json({ success:false, message: "No nearby police station or central police station found" });
         }
-        return res.json({ nearestStation: centralStation._id, options: [] });
+        return res.json({ nearestStation: centralStation, options: [] });
       }
   
       // ✅ Auto-assign the first (nearest) station

@@ -87,10 +87,10 @@ const analyzeVideo = async (req, res) => {
       const text = await result.response.text();
       const extractedData = extractAnalysis(text);
   
-      res.json(extractedData); // ✅ Send extracted data as JSON
+     return res.json(extractedData); // ✅ Send extracted data as JSON
     } catch (error) {
       console.log("Error analyzing video:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+     return res.status(500).json({ error: "Internal Server Error" });
     }
   };
   
