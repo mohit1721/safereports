@@ -24,7 +24,7 @@ const analyzeVideo = async (videoUrl) => {
     const base64Video = await convertToBase64(videoUrl);
     if (!base64Video) return { title: "Unknown", reportType: "Other", description: "Failed to process video" };
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze this emergency situation video and respond in this exact format without any asterisks or bullet points:
     TITLE: Write a clear, brief title  
@@ -41,7 +41,7 @@ const analyzeImage = async (imageUrl) => {
     const base64Image = await convertToBase64(imageUrl);
     if (!base64Image) return { title: "Unknown", reportType: "Other", description: "Failed to process image" };
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `Analyze this emergency situation image and respond in this exact format without any asterisks or bullet points:
     TITLE: Write a clear, brief title  
@@ -115,94 +115,94 @@ const findNearestStations = async (latitude, longitude) => {
     return { nearestStation, options: nearbyStations };
 };
 
-const createReport = async (req, res) => {
-    try {
+// const createReport = async (req, res) => {
+//     try {
       
 
-        console.log("frontend data->" ,req.body);
-        // const { location } = req.body;
-        //   const parsedLocation = JSON.parse(location);
+//         console.log("frontend data->" ,req.body);
+//         // const { location } = req.body;
+//         //   const parsedLocation = JSON.parse(location);
 
-        console.log("frontend files->" ,req?.files);
-        const { reportId, title, description, address, assignedStation, category } = req.body;
-        const files = req.files;
-        // const coordinates = JSON.parse(req.body.coordinates);
+//         console.log("frontend files->" ,req?.files);
+//         const { reportId, title, description, address, assignedStation, category } = req.body;
+//         const files = req.files;
+//         // const coordinates = JSON.parse(req.body.coordinates);
 
-        // if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-        //     return res.status(400).json({success:false, message: "Valid coordinates [longitude, latitude] are required." });
-        // }
+//         // if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
+//         //     return res.status(400).json({success:false, message: "Valid coordinates [longitude, latitude] are required." });
+//         // }
 
-        // const [lon, lat] = coordinates.map(Number);
-        // if (isNaN(lat) || isNaN(lon)) {
-        //     return res.status(400).json({ success:false, message: "Invalid coordinates values." });
-        // }
+//         // const [lon, lat] = coordinates.map(Number);
+//         // if (isNaN(lat) || isNaN(lon)) {
+//         //     return res.status(400).json({ success:false, message: "Invalid coordinates values." });
+//         // }
 
-        const imageUrl = files?.image
-            ? await uploadToCloudinary(files.image, process.env.FOLDER_NAME)
-            : null;
-        const videoUrl = files?.video
-            ? await uploadToCloudinary(files.video, process.env.FOLDER_NAME)
-            : null;
+//         const imageUrl = files?.image
+//             ? await uploadToCloudinary(files.image, process.env.FOLDER_NAME)
+//             : null;
+//         const videoUrl = files?.video
+//             ? await uploadToCloudinary(files.video, process.env.FOLDER_NAME)
+//             : null;
 
-        // ✅ AI Analysis (Only if image or video is provided)
-        let aiAnalysis = { title, description, reportType: category };
-        if (imageUrl) aiAnalysis = await analyzeImage(imageUrl);
-        if (videoUrl) aiAnalysis = await analyzeVideo(videoUrl);
+//         // ✅ AI Analysis (Only if image or video is provided)
+//         let aiAnalysis = { title, description, reportType: category };
+//         if (imageUrl) aiAnalysis = await analyzeImage(imageUrl);
+//         if (videoUrl) aiAnalysis = await analyzeVideo(videoUrl);
 
-    //     // ✅ Police Station Decide Karo (Manual or Auto)
-    //    // ✅ Get nearest stations
-    //    let assignedPoliceStation = assignedStation;
-    //    const { nearestStation, options } = await findNearestStations(lat, lon);
+//     //     // ✅ Police Station Decide Karo (Manual or Auto)
+//     //    // ✅ Get nearest stations
+//     //    let assignedPoliceStation = assignedStation;
+//     //    const { nearestStation, options } = await findNearestStations(lat, lon);
 
-    //    if (!assignedStation) {
-    //        assignedPoliceStation = nearestStation;
-    //    }
+//     //    if (!assignedStation) {
+//     //        assignedPoliceStation = nearestStation;
+//     //    }
 
-    //    // ✅ If no station found, return options for frontend selection
-    //    if (!assignedPoliceStation) {
-    //        return res.status(200).json({
-    //            message: "Multiple nearby police stations found. Please select one.",
-    //            options, // 🔥 Send options to frontend
-    //        });
-    //    }
-        // ✅ MongoDB me Save Karna
-        const report = new Report({
-            reportId,
-             type: "EMERGENCY",
-            title: aiAnalysis.title ||  title,
-            description: aiAnalysis.description || description,
-            category:aiAnalysis.category || category || "Other",
-            address,
-            assignedStation,
-            image: imageUrl,
-            video: videoUrl,
-            status: "PENDING",
-        });
+//     //    // ✅ If no station found, return options for frontend selection
+//     //    if (!assignedPoliceStation) {
+//     //        return res.status(200).json({
+//     //            message: "Multiple nearby police stations found. Please select one.",
+//     //            options, // 🔥 Send options to frontend
+//     //        });
+//     //    }
+//         // ✅ MongoDB me Save Karna
+//         const report = new Report({
+//             reportId,
+//              type: "EMERGENCY",
+//             title: aiAnalysis.title ||  title,
+//             description: aiAnalysis.description || description,
+//             category:aiAnalysis.category || category || "Other",
+//             address,
+//             assignedStation,
+//             image: imageUrl,
+//             video: videoUrl,
+//             status: "PENDING",
+//         });
 
-        await report.save();
-// ✅ PoliceStation Model me bhi Report add karo
-const policeStation =await PoliceStation.findByIdAndUpdate(assignedStation, {
-    $push: { reports: report._id }
-});
-const loginLink = "https://safetoreport.vercel.app/login";
+//         await report.save();
+// // ✅ PoliceStation Model me bhi Report add karo
+// const policeStation =await PoliceStation.findByIdAndUpdate(assignedStation, {
+//     $push: { reports: report._id }
+// });
+// const loginLink = "https://safetoreport.vercel.app/login";
  
-  // ✅ Send Email to Assigned Police Station
-  if (policeStation) {
-    const { email, name } = policeStation;
+//   // ✅ Send Email to Assigned Police Station
+//   if (policeStation) {
+//     const { email, name } = policeStation;
 
-    const emailContent = emailTemplatePoliceReport(loginLink, name, title, category, address);
-    await sendEmail(email, "🚨 New Report Assigned!", emailContent);
-}
+//     const emailContent = emailTemplatePoliceReport(loginLink, name, title, category, address);
+//     await sendEmail(email, "🚨 New Report Assigned!", emailContent);
+// }
 
-return res.status(201).json({
-            success:true, message: "Report created successfully",
-            report,
-        });
-    } catch (error) {
-        console.error("Report creation error:", error);
-       return res.status(500).json({ success:false, message: "Failed to create report" });
-    }
-};
+// return res.status(201).json({
+//             success:true, message: "Report created successfully",
+//             report,
+//         });
+//     } catch (error) {
+//         console.error("Report creation error:", error);
+//        return res.status(500).json({ success:false, message: "Failed to create report" });
+//     }
+// };
 
 // all reports...[filter by station**]
 
@@ -225,6 +225,105 @@ console.log("report id->", reportId)
      return res.status(500).json({ success: false, message: "Error fetching the report", details: error.message });
   }
 };
+const createReport = async (req, res) => {
+  try {
+    const { reportId, title, description, address, assignedStation, category } = req.body;
+    const files = req.files;
 
+    // Upload Media FIRST (Critical Path)
+    const imageUrl = files?.image
+      ? await uploadToCloudinary(files.image, process.env.FOLDER_NAME)
+      : null;
+
+    const videoUrl = files?.video
+      ? await uploadToCloudinary(files.video, process.env.FOLDER_NAME)
+      : null;
+
+    // DEFAULT USER DATA (ALWAYS SAFE)
+    let finalTitle = title || "Emergency Report";
+    let finalDescription = description || "No description provided";
+    let finalCategory = category || "Other";
+
+    // 🔥 AI OPTIONAL — NEVER BLOCK
+    try {
+      if (imageUrl) {
+        const ai = await analyzeImage(imageUrl).catch(() => null);
+
+        if (ai) {
+          finalTitle = ai.title || finalTitle;
+          finalDescription = ai.description || finalDescription;
+          finalCategory = ai.category || finalCategory;
+        }
+      }
+
+      if (videoUrl) {
+        const ai = await analyzeVideo(videoUrl).catch(() => null);
+
+        if (ai) {
+          finalTitle = ai.title || finalTitle;
+          finalDescription = ai.description || finalDescription;
+          finalCategory = ai.category || finalCategory;
+        }
+      }
+
+    } catch (aiOuterErr) {
+      console.log("AI Completely Ignored:", aiOuterErr.message);
+    }
+
+    // ✅ SAVE REPORT — ALWAYS HAPPENS
+    const report = new Report({
+      reportId,
+      type: "EMERGENCY",
+      title: finalTitle,
+      description: finalDescription,
+      category: finalCategory,
+      address,
+      assignedStation,
+      image: imageUrl,
+      video: videoUrl,
+      status: "PENDING"
+    });
+
+    await report.save();
+
+    // Police Station Update (Non Critical but Still Important)
+    await PoliceStation.findByIdAndUpdate(assignedStation, {
+      $push: { reports: report._id }
+    });
+
+    // Email OPTIONAL
+    try {
+      const ps = await PoliceStation.findById(assignedStation);
+
+      if (ps) {
+        const emailContent = emailTemplatePoliceReport(
+          "https://safetoreport.vercel.app/login",
+          ps.name,
+          finalTitle,
+          finalCategory,
+          address
+        );
+
+        await sendEmail(ps.email, "🚨 New Report Assigned!", emailContent);
+      }
+    } catch (mailErr) {
+      console.log("Email skipped");
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Report created successfully",
+      report
+    });
+
+  } catch (error) {
+    console.error("REAL SERVER ERROR (NOT AI):", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+};
  
 module.exports = { getReportById, createReport };

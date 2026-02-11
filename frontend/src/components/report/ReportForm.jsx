@@ -21,7 +21,7 @@ const REPORTCATEGORY = [
 ];
 
 function ReportForm({ onComplete }) {
-  
+  const [aiFailed, setAiFailed] = useState(false);
   const [formData, setFormData] = useState({
     reportId: "", // ✅ Generate unique report ID on initialization
     incidentType: "EMERGENCY",
@@ -67,54 +67,100 @@ const handleImageUpload = async (e) => {
   
     setIsAnalyzingi(true);
   
+    // try {
+    //   //  const formData = new FormData()
+    //   // formData.append("image", file); // Backend expects "image" field
+
+    //   const base64 = await new Promise((resolve, reject) => {
+    //     const reader = new FileReader();
+    //     reader.onloadend = () => resolve(reader.result);
+    //     reader.onerror = reject;
+    //     reader.readAsDataURL(file);
+    //   });
+  
+    //   setImage(base64); // ✅ Store Base64 im
+    //   setImageFile(file); // ✅ Store Image File (Report Create ke liye)
+
+    //    // ✅ Backend ko bhejo
+    //   //  console.log("Base64 Image Sending to Backend:", base64); // Debugging
+
+    //    // ✅ Send Base64 as JSON (Not multipart/form-data)
+    //    const response = await axios.post(
+    //      `${BASE_URL}/analyze/image`,
+    //      { image: base64 }, // Sending Base64 string inside JSON
+    //      {
+    //        headers: {
+    //          "Content-Type": "application/json", // ✅ Correct Content-Type for JSON
+    //        },
+    //      }
+    //    );
+   
+    //   //  console.log("Response from Backend:", response.data);
+   
+   
+    //   // const data = await response.json();
+  
+    //   if (response.data.title && response.data.description && response.data.category) {
+    //     setFormData((prev) => ({
+    //       ...prev,
+    //       title: response.data.title,
+    //       description: response.data.description,
+    //       category: response.data.category,
+    //     }));
+    //     setImage(URL.createObjectURL(file)); // For previewing the uploaded image
+    //   }
+    // } catch (error) {
+    //   toast.error("Error analyzing image");
+    //   console.error("Error analyzing image:", error);
+    // } finally {
+    //   setIsAnalyzingi(false);
+    // }
+
     try {
-      //  const formData = new FormData()
-      // formData.append("image", file); // Backend expects "image" field
+  const base64 = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-  
-      setImage(base64); // ✅ Store Base64 im
-      setImageFile(file); // ✅ Store Image File (Report Create ke liye)
+  setImage(base64);
+  setImageFile(file);
 
-       // ✅ Backend ko bhejo
-      //  console.log("Base64 Image Sending to Backend:", base64); // Debugging
+  const response = await axios.post(
+    `${BASE_URL}/analyze/image`,
+    { image: base64 },
+    { headers: { "Content-Type": "application/json" } }
+  );
 
-       // ✅ Send Base64 as JSON (Not multipart/form-data)
-       const response = await axios.post(
-         `${BASE_URL}/analyze/image`,
-         { image: base64 }, // Sending Base64 string inside JSON
-         {
-           headers: {
-             "Content-Type": "application/json", // ✅ Correct Content-Type for JSON
-           },
-         }
-       );
-   
-      //  console.log("Response from Backend:", response.data);
-   
-   
-      // const data = await response.json();
-  
-      if (response.data.title && response.data.description && response.data.category) {
-        setFormData((prev) => ({
-          ...prev,
-          title: response.data.title,
-          description: response.data.description,
-          category: response.data.category,
-        }));
-        setImage(URL.createObjectURL(file)); // For previewing the uploaded image
-      }
-    } catch (error) {
-      toast.error("Error analyzing image");
-      console.error("Error analyzing image:", error);
-    } finally {
-      setIsAnalyzingi(false);
-    }
+  if (
+    response?.data?.title &&
+    response?.data?.description &&
+    response?.data?.category
+  ) {
+    setFormData(prev => ({
+      ...prev,
+      title: response.data.title,
+      description: response.data.description,
+      category: response.data.category
+    }));
+
+    setAiFailed(false);
+  } else {
+    throw new Error("Invalid AI response");
+  }
+
+  setImage(URL.createObjectURL(file));
+
+} catch (error) {
+  console.log("AI Failed:", error);
+
+  setAiFailed(true);
+
+  toast("AI analysis failed. Please fill details manually.", {
+    icon: "⚠️"
+  });
+}
   };
   // GOOD TEST
   const handleVideoUpload = async (e) => {
@@ -687,6 +733,11 @@ className="w-full rounded-xl bg-zinc-900/50 border border-zinc-800 px-4 py-3.5
     </div>
   )}
 </div>
+{aiFailed && (
+  <p className="text-yellow-400 text-sm mb-2">
+    AI analysis unavailable. Please fill details manually.
+  </p>
+)}
 {/* title */}
       <div>
         <label className="block text-sm font-medium text-zinc-400 mb-2">
