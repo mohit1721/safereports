@@ -1,70 +1,71 @@
 import { useState } from "react";
 import MobileMenu from "./MobileMenu";
-import {Link} from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
+
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("user"));
+  } catch {
+    user = null;
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsProfileOpen(false);
+    navigate("/login");
+  };
 
   return (
     <>
-      <nav className="fixed gap-2 top-0 text-white w-full left-0 border-b border-white/5 bg-black/60 backdrop-blur-xl z-50">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex h-16 items-center justify-between">
-            {/* Logo & Brand */}
-            <div className="flex items-center space-x-3">
-              <Link to="/" className="flex items-center space-x-3">
-                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center">
-                  <svg
-                    className="h-5 w-5 text-white"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+      <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/5 bg-black/70 text-white backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between gap-2">
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600">
+                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <span className="text-lg font-semibold">SafeReport</span>
+            </Link>
+
+            <div className="hidden items-center space-x-6 md:flex">
+              <Link to="/submit-report" className="text-sm text-zinc-400 hover:text-white">Submit Report</Link>
+              <Link to="/track-report" className="text-sm text-zinc-400 hover:text-white">Track Report</Link>
+              <Link to="/how-it-works" className="text-sm text-zinc-400 hover:text-white">How It Works</Link>
+              <Link to="/resources" className="text-sm text-zinc-400 hover:text-white">Resources</Link>
+              <Link to="/contact" className="text-sm text-zinc-400 hover:text-white">Contact</Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <a href="tel:112" className="hidden rounded-full bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 ring-1 ring-red-500/20 transition hover:bg-red-500/20 md:inline-flex">Emergency: 112</a>
+
+              {user ? (
+                <div className="relative hidden md:block">
+                  <button
+                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:border-zinc-500"
+                    onClick={() => setIsProfileOpen((prev) => !prev)}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
+                    {user?.name || user?.email || "Profile"}
+                  </button>
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-2 w-44 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
+                      <p className="px-2 py-1 text-xs text-zinc-400">{user?.role || "USER"}</p>
+                      <button onClick={handleLogout} className="w-full rounded-md px-2 py-2 text-left text-sm text-red-300 hover:bg-zinc-800">Logout</button>
+                    </div>
+                  )}
                 </div>
-                <span className="text-lg font-semibold text-wrap">SafeReport</span>
-              </Link>
-            </div>
+              ) : (
+                <Link to="/login" className="hidden text-sm text-zinc-400 hover:text-white md:block">Login</Link>
+              )}
 
-            {/* Main Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
-              <Link to="/submit-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
-                Submit Report
-              </Link>
-              <Link to="/track-report" className="text-sm text-zinc-400 hover:text-white transition-colors">
-                Track Report
-              </Link>
-              <Link to="/how-it-works" className="text-sm text-zinc-400 hover:text-white transition-colors">
-                How It Works
-              </Link>
-              <Link to="/resources" className="text-sm text-zinc-400 hover:text-white transition-colors">
-                Resources
-              </Link>
-            </div>
-
-            {/* Emergency & Mobile Menu Button */}
-            <div className="flex items-center space-x-4 ">
-              <Link to="/contact" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
-                Contact
-              </Link>
-              <Link to="/login" className="hidden md:block text-sm text-zinc-400 hover:text-white transition-colors">
-                Login
-              </Link>
-              <button className="cursor-pointer group hidden md:block flex h-9 items-center gap-2 rounded-full bg-red-500/10 pl-4 pr-5 text-sm font-medium text-red-500 ring-1 ring-inset ring-red-500/20 transition-all hover:bg-red-500/20">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                <Link to="tel:112">Emergency: 112</Link>
-              </button>
-
-              {/* Mobile Menu Button */}
-              <button
-                className="md:hidden p-2 text-zinc-400 hover:text-white"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
+              <button className="p-2 text-zinc-400 hover:text-white md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -74,7 +75,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} user={user} onLogout={handleLogout} />
     </>
   );
 }

@@ -4,6 +4,11 @@ const PoliceStation = require("../models/policeStationModel");
 // ✅ Get Reports for Logged-in Police
 const MAX_DISTANCE = 50000; // 50 km (fixed)
 
+const nearestStationCache = new Map();
+const CACHE_TTL_MS = 2 * 60 * 1000;
+
+const buildNearestCacheKey = (lat, lon) => `${lat.toFixed(2)}:${lon.toFixed(2)}`;
+
 // const getReportsForPolice = async (req, res) => {
 //     try {
 //         // ✅ Sirf Police Role Allow
@@ -189,6 +194,13 @@ const getNearestPoliceStations = async (req, res) => {
     return res.status(400).json({ success:false, message: "Invalid latitude or longitude format" });
 }
       // ✅ Find nearest police stations (50km radius, max 5 results)
+      const cacheKey = buildNearestCacheKey(lat, lon);
+      const cachedResult = nearestStationCache.get(cacheKey);
+
+      if (cachedResult && Date.now() - cachedResult.createdAt < CACHE_TTL_MS) {
+        return res.json(cachedResult.payload);
+      }
+
       const nearbyStations = await PoliceStation.find({
         location: {
           $near: {
@@ -196,22 +208,26 @@ const getNearestPoliceStations = async (req, res) => {
             $maxDistance: MAX_DISTANCE, // 50 km
           },
         },
-      }).limit(5);
+      }).limit(5).lean();
   
       if (nearbyStations.length === 0) {
         // ✅ Fallback to Central Station
-        const centralStation = await PoliceStation.findOne({isCentral: true });
+        const centralStation = await PoliceStation.findOne({isCentral: true }).lean();
         if (!centralStation) {
           return res.status(404).json({ success:false, message: "No nearby police station or central police station found" });
         }
-        return res.json({ nearestStation: centralStation, options: [] });
+        const payload = { nearestStation: centralStation, options: [] };
+        nearestStationCache.set(cacheKey, { payload, createdAt: Date.now() });
+        return res.json(payload);
       }
   
       // ✅ Auto-assign the first (nearest) station
       // const nearestStation = nearbyStations[0]._id;
       const nearestStation = nearbyStations[0];
+      const payload = { nearestStation, options: nearbyStations };
+      nearestStationCache.set(cacheKey, { payload, createdAt: Date.now() });
 
-      return res.json({ nearestStation, options: nearbyStations });
+      return res.json(payload);
     } catch (error) {
       console.log("Error fetching nearest police stations:", error);
      return res.status(500).json({success:false, message: "Error fetching nearest police stations" });

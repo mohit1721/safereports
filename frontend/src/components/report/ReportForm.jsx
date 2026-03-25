@@ -179,6 +179,7 @@ const handleImageUpload = async (e) => {
       });
   
       setVideo(base64); // ✅ Store Base64 for frontend preview
+      setVideoFile(file);
   
       // console.log("Base64 Video Sending to Backend:", base64); // Debugging
   
@@ -195,7 +196,7 @@ const handleImageUpload = async (e) => {
   
       // console.log("Response from Backend:", response.data);
   
-      if (response.data.title && response.data.description && response.data.category) {
+      if (response?.data?.title && response?.data?.description && response?.data?.category) {
         setFormData((prev) => ({
           ...prev,
           title: response.data.title,
@@ -203,9 +204,13 @@ const handleImageUpload = async (e) => {
           category: response.data.category,
         }));
         setVideo(URL.createObjectURL(file)); // ✅ For video preview
+        setAiFailed(false);
+      } else {
+        throw new Error("Invalid AI response");
       }
     } catch (error) {
-      toast.error("Error analyzing video");
+      setAiFailed(true);
+      toast("AI analysis failed. Please fill details manually.", { icon: "⚠️" });
       console.error("Error analyzing video:", error);
     } finally {
       setIsAnalyzingv(false);

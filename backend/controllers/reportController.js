@@ -231,13 +231,10 @@ const createReport = async (req, res) => {
     const files = req.files;
 
     // Upload Media FIRST (Critical Path)
-    const imageUrl = files?.image
-      ? await uploadToCloudinary(files.image, process.env.FOLDER_NAME)
-      : null;
-
-    const videoUrl = files?.video
-      ? await uploadToCloudinary(files.video, process.env.FOLDER_NAME)
-      : null;
+    const [imageUrl, videoUrl] = await Promise.all([
+      files?.image ? uploadToCloudinary(files.image, process.env.FOLDER_NAME) : Promise.resolve(null),
+      files?.video ? uploadToCloudinary(files.video, process.env.FOLDER_NAME) : Promise.resolve(null),
+    ]);
 
     // DEFAULT USER DATA (ALWAYS SAFE)
     let finalTitle = title || "Emergency Report";
@@ -286,14 +283,15 @@ const createReport = async (req, res) => {
 
     await report.save();
 
-    // Police Station Update (Non Critical but Still Important)
-    await PoliceStation.findByIdAndUpdate(assignedStation, {
-      $push: { reports: report._id }
-    });
+    if (assignedStation) {
+      await PoliceStation.findByIdAndUpdate(assignedStation, {
+        $push: { reports: report._id }
+      });
+    }
 
     // Email OPTIONAL
     try {
-      const ps = await PoliceStation.findById(assignedStation);
+      const ps = assignedStation ? await PoliceStation.findById(assignedStation) : null;
 
       if (ps) {
         const emailContent = emailTemplatePoliceReport(
