@@ -136,9 +136,17 @@ const AdminDashboard = () => {
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
     
     {/* 📌 Admin Dashboard Title */}
-    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-      Admin Dashboard
-    </h1>
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => navigate(-1)}
+        className="cursor-pointer rounded-md border border-neutral-700 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-800"
+      >
+        ← Back
+      </button>
+      <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+        Admin Dashboard
+      </h1>
+    </div>
 
     {/* 📌 Buttons: Add Police Station & Logout */}
     <div className="flex w-fit h-fit gap-4">

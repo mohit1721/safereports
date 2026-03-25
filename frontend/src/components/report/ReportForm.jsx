@@ -52,7 +52,6 @@ function ReportForm({ onComplete }) {
   const [video, setVideo] = useState(null);
   const [stationOptions, setStationOptions] = useState([]); // ✅ Stores nearby stations list
   const [fileType, setFileType] = useState("image"); // Default "image"
-  const videoInputRef = useRef(null); // ✅ Create a ref for input
   const imageInputRef = useRef(null); // ✅ Create a ref for input
   const [loadingLocation, setLoadingLocation] = useState(false); // Track location fetch status
 
@@ -130,7 +129,10 @@ const handleImageUpload = async (e) => {
   const response = await axios.post(
     `${BASE_URL}/analyze/image`,
     { image: base64 },
-    { headers: { "Content-Type": "application/json" } }
+    {
+      headers: { "Content-Type": "application/json" },
+      timeout: 12000,
+    }
   );
 
   if (
@@ -160,6 +162,8 @@ const handleImageUpload = async (e) => {
   toast("AI analysis failed. Please fill details manually.", {
     icon: "⚠️"
   });
+} finally {
+  setIsAnalyzingi(false);
 }
   };
   // GOOD TEST
@@ -191,6 +195,7 @@ const handleImageUpload = async (e) => {
           headers: {
             "Content-Type": "application/json", // ✅ Correct Content-Type for JSON
           },
+          timeout: 12000,
         }
       );
   
@@ -623,8 +628,6 @@ onClick={()=> setFileType("video")}
   setVideo={setVideo} 
   handleVideoUpload={handleVideoUpload} 
   isAnalyzingv={isAnalyzingv} 
-  videoInputRef={videoInputRef} // ✅ Pass ref as a prop
-
 />
 
 {/* video */}
