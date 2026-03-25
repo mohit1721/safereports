@@ -2,7 +2,7 @@ import React from "react";
 import { useDropzone } from "react-dropzone";
 
 const VideoUpload = React.forwardRef(function VideoUpload(
-  { video, setVideo, handleVideoUpload, videoInputRef, isAnalyzingv },
+  { video, setVideo, handleVideoUpload, isAnalyzingv },
   _ref
 ) {
   const onDrop = (acceptedFiles) => {
@@ -30,7 +30,6 @@ const VideoUpload = React.forwardRef(function VideoUpload(
     >
       <input
         {...getInputProps()}
-        ref={videoInputRef}
         onChange={handleVideoUpload}
       />
 

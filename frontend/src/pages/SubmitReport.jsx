@@ -1,7 +1,10 @@
 import React from "react";
 import ReportWizard from "../components/report/ReportWizard"; // Normal import
+import { useNavigate } from "react-router-dom";
 
 export default function SubmitReport() {
+  const navigate = useNavigate();
+
   return (
     <div className="relative min-h-screen bg-black selection:bg-sky-500/20 overflow-x-hidden">
       {/* Gradient Background */}
@@ -12,6 +15,12 @@ export default function SubmitReport() {
 
       <main className="relative px-6 pt-32">
         <div className="mx-auto max-w-3xl">
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-6 cursor-pointer rounded-md border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:bg-zinc-800"
+          >
+            ← Back
+          </button>
           <div className="flex flex-col items-center text-center">
             <div className="inline-flex h-9 items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-4 text-sm text-sky-400">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

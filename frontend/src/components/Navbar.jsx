@@ -21,6 +21,13 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  const getDashboardPath = () => {
+    if (user?.role === "ADMIN") return "/admin-dashboard";
+    if (user?.role === "POLICE") return "/police-dashboard";
+    return null;
+  };
+  const dashboardPath = getDashboardPath();
+
   return (
     <>
       <nav className="fixed top-0 left-0 z-50 w-full border-b border-white/5 bg-black/70 text-white backdrop-blur-xl">
@@ -57,6 +64,15 @@ export default function Navbar() {
                   {isProfileOpen && (
                     <div className="absolute right-0 mt-2 w-44 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
                       <p className="px-2 py-1 text-xs text-zinc-400">{user?.role || "USER"}</p>
+                      {dashboardPath && (
+                        <Link
+                          to={dashboardPath}
+                          onClick={() => setIsProfileOpen(false)}
+                          className="block w-full rounded-md px-2 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800"
+                        >
+                          Dashboard
+                        </Link>
+                      )}
                       <button onClick={handleLogout} className="w-full rounded-md px-2 py-2 text-left text-sm text-red-300 hover:bg-zinc-800">Logout</button>
                     </div>
                   )}
@@ -75,7 +91,13 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} user={user} onLogout={handleLogout} />
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        user={user}
+        onLogout={handleLogout}
+        dashboardPath={dashboardPath}
+      />
     </>
   );
 }

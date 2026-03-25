@@ -175,6 +175,12 @@ const PoliceDashboard = () => {
       <div className="border-b border-neutral-800 bg-black/50 backdrop-blur-xl ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex flex-col md:flex-row items-center gap-4">
+      <button
+        onClick={() => navigate(-1)}
+        className="cursor-pointer rounded-md border border-neutral-700 px-3 py-1 text-xs text-neutral-300 hover:bg-neutral-800"
+      >
+        ← Back
+      </button>
       <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
         Police Dashboard
       </h1>
