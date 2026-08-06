@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Error from "./pages/Error";
 import SubmitReport from "./pages/SubmitReport";
+import Settings from "./pages/Settings";
 import { useDispatch, useSelector } from "react-redux";
 import TrackReport from "./pages/TrackReport";
 import PoliceDashboard from "./pages/Police/PoliceDashboard";
@@ -37,6 +38,7 @@ return(
   <Route path="/track-report" element={<TrackReport/>} />
 
   <Route path="/login" element={ <Login/> }/>
+  <Route path="/settings" element={<Settings />} />
 
 
   <Route

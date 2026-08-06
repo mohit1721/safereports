@@ -1,10 +1,10 @@
 import { useState } from "react";
 import MobileMenu from "./MobileMenu";
+import ProfileDropdown from "./ProfileDropdown";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
 
   let user = null;
@@ -17,13 +17,12 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setIsProfileOpen(false);
     navigate("/login");
   };
 
   const getDashboardPath = () => {
     if (user?.role === "ADMIN") return "/admin-dashboard";
-    if (user?.role === "POLICE") return "/police-dashboard";
+    if (user?.role === "POLICESTATION" || user?.role === "POLICE") return "/police-dashboard";
     return null;
   };
   const dashboardPath = getDashboardPath();
@@ -54,34 +53,16 @@ export default function Navbar() {
               <a href="tel:112" className="hidden rounded-full bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 ring-1 ring-red-500/20 transition hover:bg-red-500/20 md:inline-flex">Emergency: 112</a>
 
               {user ? (
-                <div className="relative hidden md:block">
-                  <button
-                    className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:border-zinc-500"
-                    onClick={() => setIsProfileOpen((prev) => !prev)}
-                  >
-                    {user?.name || user?.email || "Profile"}
-                  </button>
-                  {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-44 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
-                      <p className="px-2 py-1 text-xs text-zinc-400">{user?.role || "USER"}</p>
-                      {dashboardPath && (
-                        <Link
-                          to={dashboardPath}
-                          onClick={() => setIsProfileOpen(false)}
-                          className="block w-full rounded-md px-2 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800"
-                        >
-                          Dashboard
-                        </Link>
-                      )}
-                      <button onClick={handleLogout} className="w-full rounded-md px-2 py-2 text-left text-sm text-red-300 hover:bg-zinc-800">Logout</button>
-                    </div>
-                  )}
-                </div>
+                <ProfileDropdown user={user} dashboardPath={dashboardPath} onLogout={handleLogout} />
               ) : (
                 <Link to="/login" className="hidden text-sm text-zinc-400 hover:text-white md:block">Login</Link>
               )}
 
-              <button className="p-2 text-zinc-400 hover:text-white md:hidden" onClick={() => setIsMobileMenuOpen(true)}>
+              <button
+                className="p-2 text-zinc-400 hover:text-white md:hidden"
+                onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open menu"
+              >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
