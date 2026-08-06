@@ -2,6 +2,9 @@ const PoliceStation = require("../models/policeStationModel");
 const Report = require("../models/reportModel");
 const bcrypt = require("bcryptjs");
 const sendPoliceStationCredentials = require("../config/nodemailerConfig");
+const { generateResetToken } = require("./resetToken");
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://safetoreport.vercel.app";
 
 // ✅ Police Station Add Karne Ka Function
 const addPoliceStation = async (req, res) => {
@@ -56,6 +59,9 @@ const addPoliceStation = async (req, res) => {
         const password = Math.random().toString(36).slice(-8); // 8-character random password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // ✅ One-time password setup token (hashed in DB, raw token emailed)
+        const { raw, hashed, expires } = await generateResetToken();
+
         // ✅ Naya Police Station Create
         const newStation = new PoliceStation({
             name,
@@ -65,19 +71,27 @@ const addPoliceStation = async (req, res) => {
             location,
             district,
             state,
-            isCentral: isCentral || false
+            isCentral: isCentral || false,
+            resetPasswordToken: hashed,
+            resetPasswordExpire: new Date(expires)
         });
 
         await newStation.save();
         console.log("PS Credentials:",email , "&" ,password)
-        // ✅ Send Police Station Credentials Email
-        await sendPoliceStationCredentials(email, name, password);
+        // ✅ Send Police Station invite email (non-blocking: failures are logged, not thrown)
+        const resetLink = `${FRONTEND_URL}/reset-password?token=${raw}&email=${encodeURIComponent(email)}`;
+        const emailSent = await sendPoliceStationCredentials(email, name, resetLink);
 
-       return res.status(201).json({
+        const response = {
             success: true,
             message: "Police Station added successfully!",
-            data: newStation
-        });
+            data: newStation,
+            emailSent
+        };
+        // If the invite email couldn't be sent, give the admin the link to relay manually
+        if (!emailSent) response.resetLink = resetLink;
+
+       return res.status(201).json(response);
     } catch (error) {
        return res.status(500).json({
             success: false,

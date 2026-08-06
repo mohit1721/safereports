@@ -22,7 +22,7 @@ export default function Navbar() {
 
   const getDashboardPath = () => {
     if (user?.role === "ADMIN") return "/admin-dashboard";
-    if (user?.role === "POLICESTATION" || user?.role === "POLICE") return "/police-dashboard";
+    if (user?.role === "POLICESTATION") return "/police-dashboard";
     return null;
   };
   const dashboardPath = getDashboardPath();

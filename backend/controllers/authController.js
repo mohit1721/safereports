@@ -2,6 +2,11 @@ const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const PoliceStation = require("../models/policeStationModel");
+const sendEmail = require("../config/sendEmail");
+const emailTemplatePasswordReset = require("../mailTemplates/emailTemplatePasswordReset");
+const { generateResetToken, verifyResetToken } = require("./resetToken");
+
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://safetoreport.vercel.app";
 // wait for this to happen
 // Only an ADMIN can register another user
 const registerUser = async (req, res) => {
@@ -116,4 +121,71 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-module.exports = {loginAdmin , registerUser, loginUser };
+// ✅ Forgot Password: generate one-time reset token (hashed) + email reset link
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    let record = await User.findOne({ email });
+    if (!record) record = await PoliceStation.findOne({ email });
+
+    // Always return the same message to avoid leaking which emails exist
+    if (record) {
+      const { raw, hashed, expires } = await generateResetToken();
+      record.resetPasswordToken = hashed;
+      record.resetPasswordExpire = new Date(expires);
+      await record.save();
+
+      const resetLink = `${FRONTEND_URL}/reset-password?token=${raw}&email=${encodeURIComponent(email)}`;
+      await sendEmail(email, "🔒 Reset Your Password — SafeReport", emailTemplatePasswordReset(record.name || email, resetLink));
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "If an account exists for this email, a reset link has been sent.",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    return res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
+  }
+};
+
+// ✅ Reset Password: verify one-time token, set new password, clear token
+const resetPassword = async (req, res) => {
+  try {
+    const { token, email, newPassword } = req.body;
+    if (!token || !email || !newPassword) {
+      return res.status(400).json({ success: false, message: "Token, email and new password are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+    }
+
+    let record = await User.findOne({ email });
+    if (!record) record = await PoliceStation.findOne({ email });
+
+    const check = await verifyResetToken(record, token);
+    if (!check.ok) {
+      const message =
+        check.reason === "EXPIRED"
+          ? "This reset link has expired. Please request a new one."
+          : "This reset link is invalid or has already been used.";
+      return res.status(400).json({ success: false, message });
+    }
+
+    record.password = await bcryptjs.hash(newPassword, 10);
+    record.resetPasswordToken = null;
+    record.resetPasswordExpire = null;
+    await record.save();
+
+    return res.status(200).json({ success: true, message: "Password reset successfully. You can now log in." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
+  }
+};
+
+module.exports = { loginAdmin, registerUser, loginUser, forgotPassword, resetPassword };

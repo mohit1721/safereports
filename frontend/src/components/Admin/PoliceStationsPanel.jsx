@@ -67,7 +67,6 @@ const PoliceStationsPanel = () => {
           </thead>
           <tbody>
             {data.policeStations.map((station) => {
-              const isJharkhand = /jharkhand/i.test(station.state || "");
               return (
                 <tr key={station._id} className="border-b border-neutral-800/60">
                   <td className="py-2.5 pr-4 text-neutral-300">{station.name}</td>

@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Error from "./pages/Error";
 import SubmitReport from "./pages/SubmitReport";
 import Settings from "./pages/Settings";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import { useDispatch, useSelector } from "react-redux";
 import TrackReport from "./pages/TrackReport";
 import PoliceDashboard from "./pages/Police/PoliceDashboard";
@@ -38,6 +40,8 @@ return(
   <Route path="/track-report" element={<TrackReport/>} />
 
   <Route path="/login" element={ <Login/> }/>
+  <Route path="/forgot-password" element={<ForgotPassword />} />
+  <Route path="/reset-password" element={<ResetPassword />} />
   <Route path="/settings" element={<Settings />} />
 
 

@@ -96,3 +96,45 @@ The application can be easily deployed on [Vercel](https://vercel.com):
 2. Connect your repository to Vercel
 3. Configure the environment variables
 4. Deploy!
+
+---
+
+## 🔧 Environment Variables (`backend/.env`)
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `MONGO_URI` | ✅ | MongoDB Atlas SRV connection string |
+| `MONGO_EXPLICIT_URI` | ⚠️ | Explicit-host fallback used when Node's SRV resolver fails (e.g. `querySrv ECONNREFUSED` on Windows) |
+| `JWT_SECRET` | ✅ | Secret for signing auth tokens |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `EMAIL_FROM` | ✅ | SMTP config for all emails (`EMAIL_HOST`/`EMAIL_USER`/`EMAIL_PASS` still accepted as fallback) |
+| `RESEND_API_KEY` / `RESEND_FROM` | ⚠️ | **Resend API fallback** — used automatically when SMTP fails (or as the only provider if SMTP isn't configured) |
+| `FRONTEND_URL` | ⚠️ | Base URL for login / reset links (defaults to `https://safetoreport.vercel.app`) |
+| `GEMINI_API_KEY` | ⚠️ | Primary AI provider (image/video analysis) |
+| `OPENAI_API_KEY` | ⚠️ | Fallback AI provider — auto-used on Gemini rate-limit/quota/5xx (see `Brain.md` §4) |
+| `AI_PRIMARY_PROVIDER` / `AI_FALLBACK_PROVIDER` | ❌ | Defaults: `gemini` / `openai` |
+| `CLOUDINARY_*`, `FOLDER_NAME` | ✅ | Media uploads |
+
+> Email vars are validated at startup (fail-fast). If emails fail, they are **logged and non-blocking** — report creation and police-station creation never break because of an email issue.
+
+---
+
+## 🔐 Password Reset / Account Emails
+
+- `POST /api/auth/forgot-password` — accepts email, issues a **single-use, 1-hour** reset token (only its hash is stored), emails a secure reset link. Always returns the same message (no account enumeration).
+- `POST /api/auth/reset-password` — verifies token, updates password, clears the token. Rate-limited.
+- Admin-created police stations receive an **invite email** with a "Set Your Password" link (no plaintext passwords in email), plus the login URL.
+
+## 🤖 AI Analysis (non-blocking fallback)
+
+`backend/controllers/ai-adapter.js` wraps Gemini with a fallback to OpenAI:
+
+1. Primary: Gemini. On rate-limit / quota / 5xx → immediately tries OpenAI.
+2. Both unavailable → returns `{ aiFailed: true }` placeholder to the UI; analysis never blocks report submission (user can fill details manually).
+3. Per-provider circuit breaker: 3 consecutive failures → skip that provider for 60s.
+4. Prompts come from `backend/config/brainPrompts.js` (source of truth: `Brain.md`).
+
+## 👁️ UI notes
+
+- Login & reset-password forms have a password show/hide (eye) toggle.
+- Header has a responsive profile dropdown (Profile / Settings / Logout) on desktop and mobile.
+
