@@ -145,24 +145,26 @@ const getAllPoliceStations = async (req, res) => {
             return res.status(403).json({ success: false, message: "Access Denied! Only Admin can view police stations." });
         }
 
-        const { district, state, page = 1, limit = 10 } = req.query;
+        const { search, district, state, page = 1, limit = 10 } = req.query;
 
         let filter = {};
 
+        const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (search) {
+            const regex = { $regex: escapeRegex(search), $options: "i" };
+            filter.$or = [{ name: regex }, { email: regex }, { district: regex }, { state: regex }];
+        }
         if (district) filter.district = { $regex: district, $options: "i" };
         if (state) filter.state = { $regex: state, $options: "i" };
 
+        const totalStations = await PoliceStation.countDocuments(filter);
         const policeStations = await PoliceStation.find(filter)
             .sort({ name: 1 }) // ✅ Sort by name A-Z
             .skip((page - 1) * limit)
             .limit(parseInt(limit))
             .lean(); // ✅ Convert Mongoose Docs to Plain Objects
 
-        if (policeStations.length === 0) {
-            return res.status(200).json({ success: true, message: "No police stations found.", totalStations: 0, policeStations: [] });
-        }
-
-       return res.status(200).json({ success: true, totalStations: policeStations.length, policeStations });
+       return res.status(200).json({ success: true, totalStations, policeStations });
 
     } catch (error) {
        return res.status(500).json({ success: false, message: "Error fetching police stations", error: error.message });

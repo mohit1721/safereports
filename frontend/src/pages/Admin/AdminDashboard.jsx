@@ -4,6 +4,7 @@ import {toast} from "react-hot-toast"
 // const BASE_URL = "http://localhost:5000/api";
 import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 import axios from "axios"
+import PoliceStationsPanel from "../../components/Admin/PoliceStationsPanel";
 
 const AdminDashboard = () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
@@ -171,6 +172,7 @@ const AdminDashboard = () => {
 
       {/* Filters */}
       <main className="max-w-7xl mt-12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <PoliceStationsPanel />
         {/* <div className="mb-8 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 flex-col md:flex-row w-full">
           <input
