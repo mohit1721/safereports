@@ -1,14 +1,12 @@
 const Report = require("../models/reportModel.js");
 const PoliceStation = require("../models/policeStationModel.js")
-const {GoogleGenerativeAI} = require("@google/generative-ai")
 const {uploadToCloudinary} = require("../config/cloudinaryConfig.js")
 const axios = require("axios");
 const { v4: uuidv4 } = require('uuid');
 const formidable = require('formidable');
 const sendEmail = require("../config/sendEmail.js");
 const emailTemplatePoliceReport = require ("../mailTemplates/emailTemplatePoliceReport.js")
- 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const { analyzeMedia } = require("./ai-adapter.js");
 const convertToBase64 = async (fileUrl) => {
     try {
         const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
@@ -22,36 +20,18 @@ const convertToBase64 = async (fileUrl) => {
  
 const analyzeVideo = async (videoUrl) => {
     const base64Video = await convertToBase64(videoUrl);
-    if (!base64Video) return { title: "Unknown", reportType: "Other", description: "Failed to process video" };
+    if (!base64Video) return null;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    const prompt = `Analyze this emergency situation video and respond in this exact format without any asterisks or bullet points:
-    TITLE: Write a clear, brief title  
-    CATEGORY: Choose one (Murder, Felony, Cybercrime, Antisocial Behavior, Assault, Hate Crime, Rape, Corrupt Behaviour, Money Laundering, Sexual Assault, Arson, Robbery, Domestic Violence, Fraud, Domestic Crime, Burglary, Human Trafficking, Kidnapping, Knife Crime, Theft, Fire Outbreak, Medical Emergency, Natural Disaster, Violence, Other)  
-    DESCRIPTION: Write a clear, concise description`;
-
-    const result = await model.generateContent([prompt, { inlineData: { data: base64Video.split(",")[1], mimeType: "video/mp4" } }]);
-
-    const text = await result.response.text();
-    return extractAnalysis(text);
+    const result = await analyzeMedia("video", base64Video);
+    return result.aiFailed ? null : result;
 };
  
 const analyzeImage = async (imageUrl) => {
     const base64Image = await convertToBase64(imageUrl);
-    if (!base64Image) return { title: "Unknown", reportType: "Other", description: "Failed to process image" };
+    if (!base64Image) return null;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    const prompt = `Analyze this emergency situation image and respond in this exact format without any asterisks or bullet points:
-    TITLE: Write a clear, brief title  
-    CATEGORY: Choose one (Murder, Felony, Cybercrime, Antisocial Behavior, Assault, Hate Crime, Rape, Corrupt Behaviour, Money Laundering, Sexual Assault, Arson, Robbery, Domestic Violence, Fraud, Domestic Crime, Burglary, Human Trafficking, Kidnapping, Knife Crime, Theft, Fire Outbreak, Medical Emergency, Natural Disaster, Violence, Other)  
-    DESCRIPTION: Write a clear, concise description`;
-
-    const result = await model.generateContent([prompt, { inlineData: { data: base64Image.split(",")[1], mimeType: "image/jpeg" } }]);
-
-    const text = await result.response.text();
-    return extractAnalysis(text);
+    const result = await analyzeMedia("image", base64Image);
+    return result.aiFailed ? null : result;
 };
 
 // ✅ Extract AI Response (Common for Image & Video)

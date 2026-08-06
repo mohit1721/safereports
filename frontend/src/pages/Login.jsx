@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/operations/auth"; // Import the login thunk
+import { Eye, EyeOff } from "lucide-react";
 import {toast} from "react-hot-toast"
 const Login = () => {
   const dispatch = useDispatch();
@@ -9,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 const [isLoading, setIsLoading] = useState(false)
   // const { isLoading, error } = useSelector((state) => state.auth); // Get login status from Redux
 
@@ -55,7 +57,7 @@ const [isLoading, setIsLoading] = useState(false)
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-neutral-900/50 backdrop-blur-sm py-8 px-4 shadow-xl border border-neutral-800 rounded-xl sm:px-10">
           <form className="space-y-6" onSubmit={handleLogin}>
-            <div>
+            <div className="space-y-2">
               <label className="block text-sm font-medium text-neutral-300">Email address</label>
               <input
                 type="email"
@@ -67,16 +69,32 @@ const [isLoading, setIsLoading] = useState(false)
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="block text-sm font-medium text-neutral-300">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none block w-full px-3 py-2 border border-neutral-800 rounded-lg bg-neutral-900 placeholder-neutral-500 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20"
-                placeholder="Enter your password"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 pr-10 border border-neutral-800 rounded-lg bg-neutral-900 placeholder-neutral-500 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20"
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-800 cursor-pointer hover:text-neutral-600 cursor focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-xs text-blue-400 hover:text-blue-300 hover:underline">
+                Forgot password?
+              </Link>
             </div>
 
             {error && <div className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3">{error}</div>}
@@ -84,7 +102,7 @@ const [isLoading, setIsLoading] = useState(false)
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full cursor-pointer flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Sign in"}
             </button>

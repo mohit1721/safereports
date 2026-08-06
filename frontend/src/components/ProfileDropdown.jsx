@@ -83,7 +83,7 @@ export default function ProfileDropdown({ user, dashboardPath, onLogout }) {
           <div className="border-b border-zinc-800 bg-zinc-900/60 px-4 py-3">
             <p className="truncate text-sm font-medium text-white">{triggerLabel}</p>
             <p className="truncate text-xs text-zinc-400">{user?.email}</p>
-            <span className="mt-1.5 inline-block rounded-full bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-sky-400 ring-1 ring-sky-500/20">
+            <span className="mt-1.5 items-center inline-block rounded-full bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-sky-400 ring-1 ring-sky-500/20">
               {user?.role || "USER"}
             </span>
           </div>

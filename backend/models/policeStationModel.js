@@ -14,7 +14,9 @@ const PoliceStationSchema = new mongoose.Schema({
     district: { type: String, required: true },
     state: { type: String, required: true },
     isCentral: { type: Boolean, default: false },
-    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: "Report" }] // ✅ Reports reference added
+    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: "Report" }], // ✅ Reports reference added
+    resetPasswordToken: { type: String, default: null },
+    resetPasswordExpire: { type: Date, default: null }
 
 });
 

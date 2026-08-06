@@ -2,6 +2,8 @@ import { useState, useRef } from "react";
 import {toast} from "react-hot-toast"
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { Copy, X } from "lucide-react";
+import copy from "copy-to-clipboard";
 
 const AddPoliceStation = () => {
   // https://safereports.onrender.com
@@ -19,6 +21,9 @@ const AddPoliceStation = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const locationInputRef = useRef(null);
+  const [resetLink, setResetLink] = useState("");
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Function to fetch user's current location
   const handleUseCurrentLocation = () => {
@@ -72,9 +77,16 @@ const AddPoliceStation = () => {
         }
       );
   
-      console.log("PS created response:", response.data);
         if(response.data.success) {
-      toast.success("Police Station Added Successfully");
+      if (response.data.emailSent) {
+        toast.success(`Police Station Added! Invite sent to ${formData.email} — ask them to check the e-mail & set their password.`, { duration: 6000 });
+      } else {
+        toast.error("Police station added, but the invite email failed to send.", { duration: 5000 });
+        if (response.data.resetLink) {
+          setResetLink(response.data.resetLink);
+          setShowResetModal(true);
+        }
+      }
   
       // ✅ Reset Form Data
       setFormData({
@@ -91,6 +103,13 @@ const AddPoliceStation = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCopyResetLink = () => {
+    copy(resetLink);
+    setCopied(true);
+    toast.success("Invite link copied!");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -283,6 +302,62 @@ const AddPoliceStation = () => {
       </button>
     </form>
     </div>
+
+    {/* Invite link fallback modal (shown when the invite email fails) */}
+    {showResetModal && resetLink && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowResetModal(false)}
+        />
+        <div className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-medium text-white">Invite email failed to send</h3>
+              <p className="mt-1 text-sm text-neutral-400">
+                Share this reset link with the station so they can set their password.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowResetModal(false)}
+              className="cursor-pointer shrink-0 rounded-lg p-1.5 text-neutral-400 transition hover:bg-neutral-800 hover:text-white"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-950 p-3">
+            <input
+              readOnly
+              value={resetLink}
+              onFocus={(e) => e.target.select()}
+              className="w-full bg-transparent text-sm text-sky-400 focus:outline-none"
+            />
+            <button
+              onClick={handleCopyResetLink}
+              className="cursor-pointer flex shrink-0 items-center gap-1.5 rounded-lg bg-sky-500/10 px-3 py-1.5 text-xs font-medium text-sky-400 ring-1 ring-sky-500/20 transition hover:bg-sky-500/20"
+            >
+              {copied ? "Copied!" : "Copy"}
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <p className="mt-3 text-xs text-neutral-500">
+            The link expires in 1 hour and can be used once.
+          </p>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              onClick={() => setShowResetModal(false)}
+              className="cursor-pointer rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 transition hover:bg-neutral-800"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 </div>
 
   

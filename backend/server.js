@@ -12,6 +12,12 @@ const analyzeRoutes = require("./routes/analyzeRoutes");
 
 dotenv.config();
 
+const { validateEmailConfig } = require("./config/emailConfig");
+
+if (!validateEmailConfig()) {
+  process.exit(1);
+}
+
 const app = express();
 app.disable("x-powered-by");
 
