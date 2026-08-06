@@ -27,11 +27,15 @@ export default function MobileMenu({ isOpen, onClose, user, onLogout, dashboardP
             <a href="tel:112" className="text-sm text-red-300" onClick={onClose}>Emergency: 112</a>
             {user ? (
               <>
-                {dashboardPath && (
-                  <Link to={dashboardPath} className="text-sm text-zinc-300" onClick={onClose}>
-                    Dashboard
-                  </Link>
-                )}
+                <Link to={dashboardPath || "/settings"} className="text-sm text-zinc-300" onClick={onClose}>
+                  Profile
+                </Link>
+                <Link to="/settings" className="text-sm text-zinc-300" onClick={onClose}>
+                  Settings
+                </Link>
+                <p className="pt-2 text-xs uppercase tracking-wide text-zinc-500">
+                  Logged in as {user?.name || user?.email} ({user?.role || "USER"})
+                </p>
                 <button
                   onClick={() => {
                     onLogout();

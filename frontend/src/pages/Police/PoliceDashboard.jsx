@@ -187,14 +187,9 @@ const PoliceDashboard = () => {
       <span className="text-neutral-400 text-sm bg-neutral-900 px-3 py-1 rounded-md border border-neutral-700">
         📍 {policeStation.name + "," + policeStation.state || "Unknown Station"}
       </span>
-    </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 cursor-pointer py-2 text-sm font-medium text-neutral-300 bg-neutral-900 rounded-lg hover:bg-neutral-800 border border-neutral-800 transition-all hover:border-neutral-700"
-          >
-            Logout
-          </button>
+    </div>  
         </div>
+
       </div>
 
       {/* Filters */}
