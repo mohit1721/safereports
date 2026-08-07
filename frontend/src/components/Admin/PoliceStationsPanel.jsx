@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { TableSkeleton } from "../ui/Skeletons";
 
-const PoliceStationsPanel = () => {
+const PoliceStationsPanel = ({ refreshKey = 0 }) => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -30,7 +31,7 @@ const PoliceStationsPanel = () => {
       active = false;
       clearTimeout(timer);
     };
-  }, [search, page, limit, BASE_URL]);
+  }, [search, page, limit, refreshKey, BASE_URL]);
 
   const totalPages = Math.max(1, Math.ceil(data.totalStations / limit));
 
@@ -66,19 +67,21 @@ const PoliceStationsPanel = () => {
             </tr>
           </thead>
           <tbody>
+            {isLoading && <TableSkeleton rows={5} cols={4} />}
             {data.policeStations.map((station) => {
+               if (!station?._id) return null;
               return (
-                <tr key={station._id} className="border-b border-neutral-800/60">
-                  <td className="py-2.5 pr-4 text-neutral-300">{station.name}</td>
-                  <td className="py-2.5 pr-4 text-neutral-300">{station.email}</td>
-                  <td className="py-2.5 pr-4 text-neutral-300">{station.district}</td>
+                <tr key={station?._id} className="border-b border-neutral-800/60">
+                  <td className="py-2.5 pr-4 text-neutral-300">{station?.name}</td>
+                  <td className="py-2.5 pr-4 text-neutral-300">{station?.email}</td>
+                  <td className="py-2.5 pr-4 text-neutral-300">{station?.district}</td>
                   <td className="py-2.5">
-                    {station.isCentral ? (
+                    {station?.isCentral ? (
                       <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400 ring-1 ring-green-500/20">
-                        {station.state} (Central)
+                        {station?.state} (Central)
                       </span>
                     ) : (
-                      <span className="text-neutral-300">{station.state}</span>
+                      <span className="text-neutral-300">{station?.state}</span>
                     )}
                   </td>
                 </tr>

@@ -5,6 +5,8 @@ import {toast} from "react-hot-toast"
 import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
 import axios from "axios"
 import PoliceStationsPanel from "../../components/Admin/PoliceStationsPanel";
+import AddPoliceStationModal from "../../components/Admin/AddPoliceStationModal";
+import { ReportCardSkeleton } from "../../components/ui/Skeletons";
 
 const AdminDashboard = () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL || "https://safereports.onrender.com/api";
@@ -24,6 +26,8 @@ const AdminDashboard = () => {
     limit: 10,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddStationOpen, setIsAddStationOpen] = useState(false);
+  const [stationsRefreshKey, setStationsRefreshKey] = useState(0);
   const REPORTCATEGORY = ["",
     "Murder", "Felony", "Cybercrime", "Antisocial Behavior", "Assault", "Hate Crime",
     "Money Laundering", "Sexual Assault", "Arson", "Robbery", "Domestic Violence",
@@ -41,7 +45,6 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    console.log("Filters Applied:", filters); // ✅ Debugging filters
   
     if (!fetchReportsRef.current) {
       fetchReportsRef.current = debounce(async (filters) => {
@@ -53,11 +56,9 @@ const AdminDashboard = () => {
           );
   
           const queryParams = new URLSearchParams({ ...validFilters, page, limit }).toString();
-          console.log("Query Params:", queryParams); // ✅ Debugging Query Params
   
           const token = localStorage.getItem("token");
   
-          console.log("Fetching reports with query:", queryParams); // ✅ Check Query Params
           const { data } = await axios.get(
             `${BASE_URL}/admin/reports/?${queryParams}`,
             {
@@ -68,7 +69,6 @@ const AdminDashboard = () => {
             }
           );
   
-          console.log("Fetched Reports:", data.reports); // ✅ Debugging API response
           setReports(data.reports || []);
           setTotalReports(data.totalReports);
   
@@ -122,14 +122,6 @@ const AdminDashboard = () => {
   //   }
   // };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white mt-16">
       {/* Navbar */}
@@ -152,7 +144,7 @@ const AdminDashboard = () => {
     {/* 📌 Buttons: Add Police Station & Logout */}
     <div className="flex w-fit h-fit gap-4">
       <button
-        onClick={() => navigate("/add-police-station")} // Change route accordingly
+        onClick={() => setIsAddStationOpen(true)} // Change route accordingly
         className="cursor-pointer px-4 py-2 flex items-center gap-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all"
       >
         {/* ➕ */}
@@ -172,7 +164,7 @@ const AdminDashboard = () => {
 
       {/* Filters */}
       <main className="max-w-7xl mt-12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <PoliceStationsPanel />
+        <PoliceStationsPanel refreshKey={stationsRefreshKey} />
         {/* <div className="mb-8 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-4 flex-col md:flex-row w-full">
           <input
@@ -258,49 +250,51 @@ const AdminDashboard = () => {
 </select>
           </div>
 
-          <div className="text-neutral-400">{reports.length} Reports</div>
+          <div className="text-neutral-400">{isLoading ? "Loading..." : `${reports.length} Reports`}</div>
         </div>
          {/* Reports List */}
          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-          {reports.map((report) => (
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, i) => <ReportCardSkeleton key={i} />)
+            : reports.map((report) => (
             <div
-              key={report._id}
+              key={report?._id}
               className="bg-neutral-900/50 backdrop-blur-sm rounded-xl p-6 border border-neutral-800 hover:border-neutral-700 transition-all"
             >
               <div className="flex justify-between items-start gap-6">
                 <div className="space-y-4 flex-1">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-medium text-neutral-200">{report.title}</h2>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                      {report.status}
+                    <h2 className="text-lg font-medium text-neutral-200">{report?.title}</h2>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report?.status)}`}>
+                      {report?.status}
                     </span>
                   </div>
 
-                  <p className="text-neutral-400 text-sm">{report.description}</p>
+                  <p className="text-neutral-400 text-sm">{report?.description}</p>
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
-                    <span>📍 {report.address || "N/A"}</span>
-                    <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
-                    <span> Category: {report.category || "N/A"}</span>
+                    <span>📍 {report?.address || "N/A"}</span>
+                    <span>📅 {new Date(report?.createdAt).toLocaleDateString()}</span>
+                    <span> Category: {report?.category || "N/A"}</span>
                     <span
                     className=""
                     > Type: <span  className={`${
-    report.type ==="EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
-  } p-2 rounded-lg font-semibold`}>{report.type || "N/A"} </span> </span>
+    report?.type === "EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+  } p-2 rounded-lg font-semibold`}>{report?.type || "N/A"} </span> </span>
                   </div>
 <div className="flex flex-col md:flex-row flex-wrap rounded-lg gap-2">
 <span className="text-sm text-neutral-200 p-1">Assigned Police Station: </span>
 
 <div className="bg-[#2f572f]/10 text-[#2f572f] border border-[#2f572f]/20 p-2 rounded-lg">
 <p>
-{report.assignedStation.name} , {report.assignedStation.district} ,{report.assignedStation.state}
+{report?.assignedStation?.name ? `${report.assignedStation.name}, ${report?.assignedStation?.district || ""}, ${report?.assignedStation?.state || ""}` : "Not assigned"}
 </p>
 
-<span>Contact: {report.assignedStation.email}</span>
+<span>Contact: {report?.assignedStation?.email || "N/A"}</span>
 
 </div>
 
 </div>
-                  {report.image && (
+                  {report?.image && (
                     <img
                       src={report.image}
                       alt="Report"
@@ -316,18 +310,18 @@ const AdminDashboard = () => {
 ) : (
   <p className="text-neutral-500">Video not available</p>
 )} 
-                  {report.files?.length > 0 && (
+                  {report?.files?.length > 0 && (
                     <div className="mt-4">
                       <h3 className="font-medium text-neutral-200">Download Evidence</h3>
                       <div className="space-y-2">
                         {report.files.map((file) => (
                           <a
-                            key={file.id}
-                            href={file.filePath}
+                            key={file?.id}
+                            href={file?.filePath}
                             download
                             className="text-blue-500 hover:underline"
                           >
-                            {file.fileType.toUpperCase()} File
+                            {file?.fileType?.toUpperCase() || "FILE"} File
                           </a>
                         ))}
                       </div>
@@ -354,7 +348,7 @@ const AdminDashboard = () => {
 
           
         </div>
-{reports.length === 0 && (
+{!isLoading && reports.length === 0 && (
   <div className="flex flex-col mx-auto p-10 items-center justify-center min-h-screen bg-neutral-900/50 rounded-xl border border-neutral-800 text-neutral-400 py-12">
     {console.log("No Reports Found! filteredReports.length =", reports.length)}
     
@@ -407,8 +401,16 @@ const AdminDashboard = () => {
   </button>
 </div>
 
-       
-      </main>
+       </main>
+
+       <AddPoliceStationModal
+         isOpen={isAddStationOpen}
+         onClose={() => setIsAddStationOpen(false)}
+         onAdded={() => {
+           setIsAddStationOpen(false);
+           setStationsRefreshKey((k) => k + 1);
+         }}
+       />
     </div>
   );
 };
