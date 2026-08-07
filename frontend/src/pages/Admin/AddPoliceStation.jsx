@@ -24,6 +24,7 @@ const AddPoliceStation = () => {
   const [resetLink, setResetLink] = useState("");
   const [showResetModal, setShowResetModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [stationEmail, setStationEmail] = useState("");
 
   // Function to fetch user's current location
   const handleUseCurrentLocation = () => {
@@ -78,14 +79,15 @@ const AddPoliceStation = () => {
       );
   
         if(response.data.success) {
-      if (response.data.emailSent) {
-        toast.success(`Police Station Added! Invite sent to ${formData.email} — ask them to check the e-mail & set their password.`, { duration: 6000 });
-      } else {
-        toast.error("Police station added, but the invite email failed to send.", { duration: 5000 });
-        if (response.data.resetLink) {
-          setResetLink(response.data.resetLink);
-          setShowResetModal(true);
-        }
+      const addedEmail = formData.email;
+      toast.success(`Police Station Added! ${addedEmail} needs to check the mail & set their password.`, { duration: 6000 });
+
+      // Email is sent in the background — always show the invite link so the
+      // admin can copy/share it if the email fails to deliver.
+      if (response.data.resetLink) {
+        setResetLink(response.data.resetLink);
+        setStationEmail(addedEmail);
+        setShowResetModal(true);
       }
   
       // ✅ Reset Form Data
@@ -303,7 +305,7 @@ const AddPoliceStation = () => {
     </form>
     </div>
 
-    {/* Invite link fallback modal (shown when the invite email fails) */}
+    {/* Invite link modal (shown after adding; link is the manual fallback if the email fails) */}
     {showResetModal && resetLink && (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
@@ -313,9 +315,17 @@ const AddPoliceStation = () => {
         <div className="relative w-full max-w-lg rounded-2xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-lg font-medium text-white">Invite email failed to send</h3>
-              <p className="mt-1 text-sm text-neutral-400">
-                Share this reset link with the station so they can set their password.
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10 text-green-400 ring-1 ring-green-500/20">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <h3 className="text-lg font-medium text-white">Police Station Added</h3>
+              </div>
+              <p className="mt-2 text-sm text-neutral-400">
+                An invite email was sent to <span className="text-neutral-200">{stationEmail}</span>.
+                If it doesn't arrive, share this reset link so they can set their password.
               </p>
             </div>
             <button
@@ -352,7 +362,7 @@ const AddPoliceStation = () => {
               onClick={() => setShowResetModal(false)}
               className="cursor-pointer rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 transition hover:bg-neutral-800"
             >
-              Close
+              Done
             </button>
           </div>
         </div>

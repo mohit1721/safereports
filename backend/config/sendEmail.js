@@ -9,6 +9,10 @@ const createTransporter = () => {
     port: cfg.port,
     secure: cfg.port === 465,
     auth: { user: cfg.user, pass: cfg.pass },
+    // Hard timeouts so a blocked/slow SMTP host can never hang the request
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
 };
 
@@ -43,7 +47,7 @@ const sendViaSMTP = async (to, subject, html, retries) => {
       if (!transient || attempt === retries) {
         return false;
       }
-      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
     }
   }
   return false;
@@ -82,7 +86,7 @@ const sendViaResend = async (to, subject, html) => {
       console.error(
         "   💡 Resend only allows onboarding@resend.dev to send to your own email. " +
           "Verify a domain at https://resend.com/domains and set RESEND_FROM to an address on it " +
-          "(e.g. \"SafeReport Support <support@yourdomain.com>\") to reach other recipients."
+          '(e.g. "SafeReport Support <support@yourdomain.com>") to reach other recipients.'
       );
     }
     return false;
@@ -92,11 +96,23 @@ const sendViaResend = async (to, subject, html) => {
   }
 };
 
-// Primary: SMTP (with retries). Fallback: Resend API. Never throws; logs failures.
-const sendEmail = async (to, subject, html, retries = 2) => {
-  if (await sendViaSMTP(to, subject, html, retries)) return true;
-  if (await sendViaResend(to, subject, html)) return true;
-  return false;
+// Primary: SMTP (with retries). Fallback: Resend API.
+// Bounded by a hard timeout so it can NEVER hang the caller. Never throws.
+const sendEmail = async (to, subject, html, retries = 1) => {
+  const deadline = new Promise((resolve) =>
+    setTimeout(() => {
+      console.error(`⏱ Email to ${to} (${subject}) timed out after 25s`);
+      resolve(false);
+    }, 25000)
+  );
+
+  const attempt = (async () => {
+    if (await sendViaSMTP(to, subject, html, retries)) return true;
+    if (await sendViaResend(to, subject, html)) return true;
+    return false;
+  })();
+
+  return Promise.race([attempt, deadline]);
 };
 
 module.exports = sendEmail;
