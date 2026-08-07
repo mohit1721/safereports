@@ -4,6 +4,7 @@ import  {toast} from "react-hot-toast"
 import axios from "axios"
 // const BASE_URL = "http://localhost:5000/api";
 import { debounce } from "lodash"; // 🔥 Install lodash: npm install lodash
+import { ReportCardSkeleton } from "../../components/ui/Skeletons";
 
 // import 'video-react/dist/video-react.css'; //~ in new
 // import {
@@ -60,7 +61,6 @@ const PoliceDashboard = () => {
 
   // 📌 Fetch Reports (Police-Specific)
   useEffect(() => {
-    console.log("Filters Applied:", filters); // ✅ Debugging filters
     if (!fetchReportsRef.current) {
       fetchReportsRef.current = debounce(async (filters) => {
         setIsLoading(true);
@@ -69,11 +69,7 @@ const PoliceDashboard = () => {
             Object.entries(filters).filter(([_, v]) => v !== "")
           );
           const queryParams = new URLSearchParams({ ...validFilters, page, limit }).toString();
-          console.log("Query Params:", queryParams); // Debugging
-          // const queryParams = new URLSearchParams(validFilters).toString();
           const token = localStorage.getItem("token");
-  
-          console.log("Fetching reports with query:", queryParams); // ✅ Check Query Params
           const { data } = await axios.get(
             `${BASE_URL}/police/reports/police-station?${queryParams}`,
             {
@@ -84,7 +80,6 @@ const PoliceDashboard = () => {
             }
           );
   
-          console.log("Fetched Reports:", data.reports); // ✅ Debugging API response
           setReports(data.reports || []);
           setTotalReports(data.totalReports);
 
@@ -160,15 +155,7 @@ const PoliceDashboard = () => {
   };
   
 
-  // 📌 Show Loading Spinner
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
+  // 📌 Show Skeleton While Loading
   return (
     <div className="min-h-screen bg-black text-white mt-16">
       {/* Navbar */}
@@ -185,7 +172,7 @@ const PoliceDashboard = () => {
         Police Dashboard
       </h1>
       <span className="text-neutral-400 text-sm bg-neutral-900 px-3 py-1 rounded-md border border-neutral-700">
-        📍 {policeStation.name + "," + policeStation.state || "Unknown Station"}
+        📍 {policeStation?.name ? `${policeStation.name}, ${policeStation?.state || ""}` : "Unknown Station"}
       </span>
     </div>  
         </div>
@@ -241,38 +228,40 @@ const PoliceDashboard = () => {
 </select>
           </div>
 
-          <div className="text-neutral-400">{reports.length} Reports</div>
+          <div className="text-neutral-400">{isLoading ? "Loading..." : `${reports.length} Reports`}</div>
         </div>
 
         {/* Reports List */}
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-          {reports.map((report) => (
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, i) => <ReportCardSkeleton key={i} />)
+            : reports.map((report) => (
             <div
-              key={report._id}
+              key={report?._id}
               className="bg-neutral-900/50 backdrop-blur-sm rounded-xl p-6 border border-neutral-800 hover:border-neutral-700 transition-all"
             >
               <div className="flex justify-between items-start gap-6">
                 <div className="space-y-4 flex-1">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-medium text-neutral-200">{report.title}</h2>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                      {report.status}
+                    <h2 className="text-lg font-medium text-neutral-200">{report?.title}</h2>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report?.status)}`}>
+                      {report?.status}
                     </span>
                   </div>
 
-                  <p className="text-neutral-400 text-sm">{report.description}</p>
+                  <p className="text-neutral-400 text-sm">{report?.description}</p>
                   <div className="flex flex-wrap gap-6 text-sm text-neutral-500">
-                    <span>📍 {report.address || "N/A"}</span>
-                    <span>📅 {new Date(report.createdAt).toLocaleDateString()}</span>
-                    <span> Category: {report.category || "N/A"}</span>
+                    <span>📍 {report?.address || "N/A"}</span>
+                    <span>📅 {new Date(report?.createdAt).toLocaleDateString()}</span>
+                    <span> Category: {report?.category || "N/A"}</span>
                     <span
                     className=""
                     > Type: <span  className={`${
-    report.type ==="EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
-  } p-2 rounded-lg font-semibold`}>{report.type || "N/A"} </span> </span>
+    report?.type === "EMERGENCY" ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-orange-500/10 text-orange-500 border border-orange-500/20"
+  } p-2 rounded-lg font-semibold`}>{report?.type || "N/A"} </span> </span>
                   </div>
 
-                  {report.image && (
+                  {report?.image && (
                     <img
                       src={report.image}
                       alt="Report"
@@ -288,18 +277,18 @@ const PoliceDashboard = () => {
 ) : (
   <p className="text-neutral-500">Video not available</p>
 )} 
-                  {report.files?.length > 0 && (
+                  {report?.files?.length > 0 && (
                     <div className="mt-4">
                       <h3 className="font-medium text-neutral-200">Download Evidence</h3>
                       <div className="space-y-2">
                         {report.files.map((file) => (
                           <a
-                            key={file.id}
-                            href={file.filePath}
+                            key={file?.id}
+                            href={file?.filePath}
                             download
                             className="text-blue-500 hover:underline"
                           >
-                            {file.fileType.toUpperCase()} File
+                            {file?.fileType?.toUpperCase() || "FILE"} File
                           </a>
                         ))}
                       </div>
@@ -309,8 +298,8 @@ const PoliceDashboard = () => {
 
                 {/* Status Update */}
                 <select
-                  value={report.status}
-                  onChange={(e) => updateReportStatus(report._id, e.target.value)}
+                  value={report?.status}
+                  onChange={(e) => updateReportStatus(report?._id, e.target.value)}
                   className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-lg px-4 py-2"
                 >
                   <option value="PENDING">Pending</option>
@@ -323,7 +312,7 @@ const PoliceDashboard = () => {
           ))}
         </div>
     
-        {reports.length === 0 && (
+        {!isLoading && reports.length === 0 && (
   <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-900/50 rounded-xl border border-neutral-800 text-neutral-400 py-12">
     {console.log("No Reports Found! filteredReports.length =", reports.length)}
     

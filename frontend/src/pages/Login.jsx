@@ -22,8 +22,8 @@ const [isLoading, setIsLoading] = useState(false)
     console.log("logged in response",response);
     if (response.success) {
       // Redirect based on role
-      const {role}  = response.user;
-      console.log("logged in response role",response.user.role);
+      const {role} = response.user || {};
+      console.log("logged in response role",response.user?.role);
 
       if (role === "POLICESTATION")
       {

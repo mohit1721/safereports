@@ -4,4 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
- 
+/* Hide scrollbar but keep scrolling (used on long modals) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

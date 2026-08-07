@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Search, Loader } from "lucide-react";
 import axios from "axios";
 import {toast} from "react-hot-toast"
+import { DetailCardSkeleton } from "../ui/Skeletons";
 export default function ReportTracker() {
   const [reportId, setReportId] = useState("");
   const [error, setError] = useState("");
@@ -125,6 +126,13 @@ const getStatusColor = (status) => {
             </form>
           </div>
 
+          {/* Loading Skeleton */}
+          {loading && (
+            <div className="w-full">
+              <DetailCardSkeleton />
+            </div>
+          )}
+
           {/* Results Section */}
           <div
             className={`transition-all duration-300 ${
@@ -141,45 +149,51 @@ const getStatusColor = (status) => {
                 <div className="grid gap-4">
                   <div className="flex justify-between items-center p-3 rounded-lg bg-white/5">
                     <span className="text-zinc-400">Status</span>
-                    <span className={`font-medium ${getStatusColor(reportDetails.status)} px-3 py-1 rounded-full bg-white/5`}>
-                      {reportDetails.status.toUpperCase()}
+                    <span className={`font-medium ${getStatusColor(reportDetails?.status)} px-3 py-1 rounded-full bg-white/5`}>
+                      {reportDetails?.status?.toUpperCase() || "N/A"}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 rounded-lg bg-white/5">
                     <span className="text-zinc-400">Report ID</span>
-                    <span className="text-white font-mono">{reportDetails.reportId || reportDetails.id}</span>
+                    <span className="text-white font-mono">{reportDetails?.reportId || reportDetails?.id || "N/A"}</span>
                   </div>
 
                   <div className="flex justify-between items-center p-3 rounded-lg bg-white/5">
                     <span className="text-zinc-400">Submitted On</span>
                     <span className="text-white">
-                      {new Date(reportDetails.createdAt).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {reportDetails?.createdAt
+                        ? new Date(reportDetails.createdAt).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "N/A"}
                     </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-white/5 space-y-1.5">
                     <span className="text-zinc-400 text-sm">Title</span>
-                    <span className="text-white block font-medium">{reportDetails.title}</span>
+                    <span className="text-white block font-medium">{reportDetails?.title}</span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-white/5 space-y-1.5">
                     <span className="text-zinc-400 text-sm">Assigned Police Station</span>
-                    <span className="text-white block font-medium">{reportDetails.assignedStation.name} , {reportDetails.assignedStation.district} , {reportDetails.assignedStation.state}</span>
+                    <span className="text-white block font-medium">
+                      {reportDetails?.assignedStation
+                        ? `${reportDetails.assignedStation.name || ""}, ${reportDetails.assignedStation.district || ""}, ${reportDetails.assignedStation.state || ""}`
+                        : "Not assigned"}
+                    </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-white/5 space-y-1.5">
                     <span className="text-zinc-400 text-sm">Location</span>
-                    <span className="text-white block font-medium">{reportDetails.address}</span>
+                    <span className="text-white block font-medium">{reportDetails?.address || "N/A"}</span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-white/5 space-y-1.5">
                     <span className="text-zinc-400 text-sm">Description</span>
-                    <p className="text-white text-sm leading-relaxed">{reportDetails.description}</p>
+                    <p className="text-white text-sm leading-relaxed">{reportDetails?.description}</p>
                   </div>
                 </div>
               </div>
