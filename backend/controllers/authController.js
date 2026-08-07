@@ -140,7 +140,13 @@ const forgotPassword = async (req, res) => {
       await record.save();
 
       const resetLink = `${FRONTEND_URL}/reset-password?token=${raw}&email=${encodeURIComponent(email)}`;
-      await sendEmail(email, "🔒 Reset Your Password — SafeReport", emailTemplatePasswordReset(record.name || email, resetLink));
+      sendEmail(email, "🔒 Reset Your Password — SafeReport", emailTemplatePasswordReset(record.name || email, resetLink))
+        .then((ok) =>
+          ok
+            ? console.log(`✅ Reset email sent to ${email}`)
+            : console.error(`❌ Reset email to ${email} failed`)
+        )
+        .catch((err) => console.error("❌ Reset email error:", err.message));
     }
 
     return res.status(200).json({

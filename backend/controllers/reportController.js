@@ -269,7 +269,7 @@ const createReport = async (req, res) => {
       });
     }
 
-    // Email OPTIONAL
+    // Email OPTIONAL (fire-and-forget: never block report submission on SMTP)
     try {
       const ps = assignedStation ? await PoliceStation.findById(assignedStation) : null;
 
@@ -282,7 +282,13 @@ const createReport = async (req, res) => {
           address
         );
 
-        await sendEmail(ps.email, "🚨 New Report Assigned!", emailContent);
+        sendEmail(ps.email, "🚨 New Report Assigned!", emailContent)
+          .then((ok) =>
+            ok
+              ? console.log(`✅ Report email sent to ${ps.email}`)
+              : console.error(`❌ Report email to ${ps.email} failed`)
+          )
+          .catch(() => {});
       }
     } catch (mailErr) {
       console.log("Email skipped");

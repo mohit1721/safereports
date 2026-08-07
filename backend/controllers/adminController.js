@@ -78,20 +78,25 @@ const addPoliceStation = async (req, res) => {
 
         await newStation.save();
         console.log("PS Credentials:",email , "&" ,password)
-        // ✅ Send Police Station invite email (non-blocking: failures are logged, not thrown)
+        // ✅ Send invite email in the background — NEVER block the API on SMTP
+        // (deployed hosts can hang on SMTP; sendEmail itself is bounded to ~25s)
         const resetLink = `${FRONTEND_URL}/reset-password?token=${raw}&email=${encodeURIComponent(email)}`;
-        const emailSent = await sendPoliceStationCredentials(email, name, resetLink);
+        sendPoliceStationCredentials(email, name, resetLink)
+          .then((ok) =>
+            ok
+              ? console.log(`✅ Invite email sent to ${email}`)
+              : console.error(`❌ Invite email to ${email} failed`)
+          )
+          .catch((err) => console.error("❌ Invite email error:", err.message));
 
-        const response = {
+       return res.status(201).json({
             success: true,
             message: "Police Station added successfully!",
             data: newStation,
-            emailSent
-        };
-        // If the invite email couldn't be sent, give the admin the link to relay manually
-        if (!emailSent) response.resetLink = resetLink;
-
-       return res.status(201).json(response);
+            // Always expose the invite link so the admin can relay it manually
+            // if the email fails to deliver.
+            resetLink
+        });
     } catch (error) {
        return res.status(500).json({
             success: false,
